@@ -22,7 +22,14 @@ customer's khata — all without needing to read or type.
 Grab the latest APK from the [Releases page](https://github.com/hanova-dev/BoloBill/releases/latest),
 or the direct link below:
 
-**➡️ [BoloBill-v1.0.2.apk](https://github.com/hanova-dev/BoloBill/releases/download/v1.0.2/BoloBill-v1.0.2.apk)** (Android 8.0 / API 26+)
+**➡️ [BoloBill-v1.0.3.apk](https://github.com/hanova-dev/BoloBill/releases/download/v1.0.3/BoloBill-v1.0.3.apk)** (Android 8.0 / API 26+)
+
+> **Coming from v1.0.2 or earlier?** Uninstall the old app first. v1.0.3
+> switched to a real release signing key (previous builds used the shared
+> Flutter debug key, which is exactly the kind of thing phone security
+> software silently refuses to open) — Android won't install this over an
+> app signed with a different key. This is a one-time thing; updates from
+> v1.0.3 onward will install normally.
 
 You'll need to allow "install from unknown sources" for your browser or file
 manager, since this isn't distributed through the Play Store.
