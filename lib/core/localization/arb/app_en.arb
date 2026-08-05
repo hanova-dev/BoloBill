@@ -47,6 +47,7 @@
   "businessTypeTailor": "Tailor",
   "businessTypeBakery": "Bakery",
   "businessTypeGeneralStore": "General Store",
+  "businessTypeMedicalStore": "Medical Store",
   "businessTypeOther": "Other",
 
   "micPermissionDenied": "Microphone access is needed to speak — you can still type instead",

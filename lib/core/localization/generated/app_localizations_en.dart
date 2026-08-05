@@ -115,6 +115,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get businessTypeGeneralStore => 'General Store';
 
   @override
+  String get businessTypeMedicalStore => 'Medical Store';
+
+  @override
   String get businessTypeOther => 'Other';
 
   @override

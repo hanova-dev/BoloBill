@@ -115,6 +115,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get businessTypeGeneralStore => 'جنرل اسٹور';
 
   @override
+  String get businessTypeMedicalStore => 'میڈیکل اسٹور';
+
+  @override
   String get businessTypeOther => 'دیگر';
 
   @override
@@ -558,6 +561,9 @@ class AppLocalizationsUrLatn extends AppLocalizationsUr {
 
   @override
   String get businessTypeGeneralStore => 'General';
+
+  @override
+  String get businessTypeMedicalStore => 'Medical Store';
 
   @override
   String get businessTypeOther => 'Other';

@@ -10,6 +10,7 @@ enum BusinessType {
   tailor('tailor'),
   bakery('bakery'),
   generalStore('general_store'),
+  medicalStore('medical_store'),
   other('other');
 
   const BusinessType(this.dbValue);

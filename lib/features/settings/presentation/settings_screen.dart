@@ -30,6 +30,7 @@ class SettingsScreen extends ConsumerWidget {
         BusinessType.tailor => l10n.businessTypeTailor,
         BusinessType.bakery => l10n.businessTypeBakery,
         BusinessType.generalStore => l10n.businessTypeGeneralStore,
+        BusinessType.medicalStore => l10n.businessTypeMedicalStore,
         BusinessType.other => l10n.businessTypeOther,
       };
 

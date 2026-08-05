@@ -26,6 +26,8 @@ class _BusinessTypeScreenState extends ConsumerState<BusinessTypeScreen> {
     (BusinessType.tailor, '🧵'),
     (BusinessType.bakery, '🍞'),
     (BusinessType.generalStore, '🏪'),
+    (BusinessType.medicalStore, '💊'),
+    (BusinessType.other, '🏬'),
   ];
 
   String _labelFor(AppLocalizations l10n, BusinessType type) => switch (type) {
@@ -35,6 +37,7 @@ class _BusinessTypeScreenState extends ConsumerState<BusinessTypeScreen> {
         BusinessType.tailor => l10n.businessTypeTailor,
         BusinessType.bakery => l10n.businessTypeBakery,
         BusinessType.generalStore => l10n.businessTypeGeneralStore,
+        BusinessType.medicalStore => l10n.businessTypeMedicalStore,
         BusinessType.other => l10n.businessTypeOther,
       };
 

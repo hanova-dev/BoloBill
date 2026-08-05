@@ -16,6 +16,20 @@ abstract final class SlotParser {
     'rupee', 'rupya', 'rupye', 'rupaye', 'rs', 'روپے', 'روپیہ',
   };
 
+  /// Colloquial Urdu genitive particles — "200 *ki*", "600 *ka*" — are how
+  /// a price actually gets said out loud far more often than an explicit
+  /// "rupee"/"rupya" (confirmed by on-device retailer testing: none of
+  /// "cheeni 200 ki", "200 ka kala saban", "kali pati 400 ki" say "rupee"
+  /// at all — every one of them would previously parse to Rs. 0). Unlike
+  /// [_rupeeWords], "ki"/"ka" are common short words elsewhere in Urdu too
+  /// (possessives, unrelated phrases), so — unlike the unconditional
+  /// consume-on-sight below for the unambiguous rupee words — one of these
+  /// is only treated as a price marker, and only removed from the item
+  /// name, when a number actually sits immediately before it. A stray
+  /// "ki"/"ka" with nothing to anchor it is left alone as ordinary name
+  /// text rather than assumed to be about price.
+  static const _genitivePriceWords = {'ki', 'ka', 'کی', 'کا'};
+
   static ParsedLineItem parse(String rawTranscript) {
     final trimmed = rawTranscript.trim();
     final tokens = trimmed.isEmpty ? const <String>[] : trimmed.split(RegExp(r'\s+'));
@@ -49,8 +63,15 @@ abstract final class SlotParser {
     var priceConfidence = 0.0;
     for (var i = 0; i < tokens.length; i++) {
       if (consumed.contains(i)) continue;
-      if (!_rupeeWords.contains(DomainGrammar.normalize(tokens[i]))) continue;
+      final norm = DomainGrammar.normalize(tokens[i]);
+      final isStrictMarker = _rupeeWords.contains(norm);
+      final isGenitiveMarker = _genitivePriceWords.contains(norm);
+      if (!isStrictMarker && !isGenitiveMarker) continue;
       final found = _findNumberBefore(tokens, i, consumed);
+      // A genitive particle only counts as a price marker when there's
+      // actually a number right before it — otherwise it's just an
+      // ordinary word and scanning continues past it.
+      if (found == null && isGenitiveMarker) continue;
       consumed.add(i);
       if (found != null) {
         pricePerUnit = found.value;

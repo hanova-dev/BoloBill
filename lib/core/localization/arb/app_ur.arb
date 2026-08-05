@@ -41,6 +41,7 @@
   "businessTypeTailor": "درزی",
   "businessTypeBakery": "بیکری",
   "businessTypeGeneralStore": "جنرل اسٹور",
+  "businessTypeMedicalStore": "میڈیکل اسٹور",
   "businessTypeOther": "دیگر",
 
   "micPermissionDenied": "بولنے کے لیے مائیک کی اجازت درکار ہے — آپ ٹائپ بھی کر سکتے ہیں",

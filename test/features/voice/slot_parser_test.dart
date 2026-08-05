@@ -69,6 +69,44 @@ void main() {
     });
   });
 
+  group('colloquial "ki"/"ka" price markers (real-device retailer testing)', () {
+    test('"ki" with no unit spoken at all — flat-priced item, no quantity word', () {
+      final parsed = SlotParser.parse('cheeni 200 ki');
+
+      expect(parsed.itemNameRaw, 'cheeni');
+      expect(parsed.pricePerUnit.rupees, 200.0);
+      expect(parsed.priceConfidence, greaterThanOrEqualTo(0.9));
+      // Unit/quantity were never spoken, so the "1 piece" default still
+      // needs a confirming tap — only the price marker gap is being fixed
+      // here.
+      expect(parsed.quantityConfidence, 0.0);
+    });
+
+    test('"ka" before the item name, with a descriptive (color) word kept as part of it', () {
+      final parsed = SlotParser.parse('200 ka kala saban');
+
+      expect(parsed.itemNameRaw, 'kala saban');
+      expect(parsed.pricePerUnit.rupees, 200.0);
+    });
+
+    test('"ki" combined with a real unit and fraction word parses as a fully clean auto-fill', () {
+      final parsed = SlotParser.parse('adha kilo kali pati 400 ki');
+
+      expect(parsed.itemNameRaw, 'kali pati');
+      expect(parsed.quantity, 0.5);
+      expect(parsed.unit, QuantityUnit.kg);
+      expect(parsed.pricePerUnit.rupees, 400.0);
+      expect(parsed.needsConfirmation, isFalse);
+    });
+
+    test('a stray "ki" with no adjacent number is left in the item name, not treated as a price', () {
+      final parsed = SlotParser.parse('yeh dukaan ki cheeni hai');
+
+      expect(parsed.priceConfidence, 0.0);
+      expect(parsed.itemNameRaw, contains('ki'));
+    });
+  });
+
   group('low-confidence / ambiguous parses that must trip the confidence gate', () {
     test('unit spoken with no quantity defaults to 1 but is flagged', () {
       final parsed = SlotParser.parse('cooking oil litre 300 rupee');

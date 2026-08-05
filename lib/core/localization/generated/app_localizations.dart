@@ -303,6 +303,12 @@ abstract class AppLocalizations {
   /// **'General Store'**
   String get businessTypeGeneralStore;
 
+  /// No description provided for @businessTypeMedicalStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Medical Store'**
+  String get businessTypeMedicalStore;
+
   /// No description provided for @businessTypeOther.
   ///
   /// In en, this message translates to:

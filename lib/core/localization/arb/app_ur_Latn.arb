@@ -41,6 +41,7 @@
   "businessTypeTailor": "Tailor",
   "businessTypeBakery": "Bakery",
   "businessTypeGeneralStore": "General",
+  "businessTypeMedicalStore": "Medical Store",
   "businessTypeOther": "Other",
 
   "micPermissionDenied": "Bolne ke liye mic ki ijazat chahiye — aap type bhi kar sakte hain",
