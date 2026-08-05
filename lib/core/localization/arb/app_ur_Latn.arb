@@ -1,0 +1,187 @@
+{
+  "@@locale": "ur_Latn",
+  "appName": "BoloBill",
+  "appTagline": "Bolo aur Bill Banao",
+  "chooseYourLanguage": "APNI ZUBAAN CHUNAIN",
+  "languageUrdu": "Urdu",
+  "languageRomanUrdu": "Roman Urdu",
+  "languageEnglish": "English",
+  "themeDarkLabel": "Dark Theme",
+  "themeLightLabel": "Light Theme",
+  "placeholderTitle": "Theme aur Zubaan Check",
+  "placeholderBody": "Yeh screen sabit karti hai keh asal features banne se pehle theme aur zubaan ki tabdeeli theek kaam kar rahi hai.",
+  "placeholderSampleAmountLabel": "BILL TOTAL",
+  "placeholderSampleAmount": "Rs. 1,270",
+
+  "signInFailedMessage": "Sign-in nahi ho saka — dobara koshish karein",
+  "createAccountTitle": "Apna Account Banayein",
+  "chooseAMethod": "Ek tareeqa chunain",
+  "continueWithGoogle": "Continue with Google",
+  "continueWithPhone": "Phone Number Se Jaari Rakhein",
+  "googlePrivacyNote": "Google se sirf naam aur email liya jayega — koi post nahi hogi.",
+
+  "enterNumberTitle": "Number Likhein",
+  "mobileNumberLabel": "MOBILE NUMBER",
+  "sendOtp": "OTP Bhejein",
+  "continueLabel": "Aagay Barhein",
+
+  "enterCodeTitle": "Code Darj Karein",
+  "otpSentTo": "Code {phone} par bheja gaya",
+  "@otpSentTo": {
+    "placeholders": { "phone": { "type": "String" } }
+  },
+  "otpIncorrectMessage": "Yeh code theek nahi lagta — dobara koshish karein",
+  "verifyLabel": "Tasdeeq Karein",
+
+  "chooseShopTitle": "Apni Dukaan Chunain",
+  "chooseShopSubtitle": "Tap a picture that matches your shop",
+  "businessTypeGrocery": "Kirana",
+  "businessTypeTeaStall": "Chai Khoka",
+  "businessTypeVegetableCart": "Sabzi Cart",
+  "businessTypeTailor": "Tailor",
+  "businessTypeBakery": "Bakery",
+  "businessTypeGeneralStore": "General",
+  "businessTypeOther": "Other",
+
+  "micPermissionDenied": "Bolne ke liye mic ki ijazat chahiye — aap type bhi kar sakte hain",
+  "micUnavailable": "Is device par awaz abhi dastyab nahi — please type karein",
+  "sayYourShopName": "Dukaan ka naam bolein",
+  "shopNameHint": "Aap ki dukaan ka naam",
+  "heardItCorrect": "Sun liya — theek hai?",
+
+  "setupCompleteTitle": "Sab tayar hai!",
+  "setupCompleteBody": "Aap ki dukaan tayar hai. Aayein pehla bill banayein.",
+  "startBillingButton": "Billing Shuru Karein",
+
+  "todayLabel": "Aaj",
+  "startNewBill": "Naya Bill Banayein",
+  "tapMicOrManual": "Bolne ke liye mic dabayein, ya khud likhein",
+  "enterManually": "Khud Likhein",
+
+  "confirmVoiceEntryTitle": "Tasdeeq Karein",
+  "manualEntryTitle": "Cheez Shamil Karein",
+  "lowConfidenceBanner": "Saaf sunai nahi diya — check kar ke theek karein",
+  "itemNameLabel": "Cheez Ka Naam",
+  "unitLabel": "Unit",
+  "quantityLabel": "Miqdaar",
+  "pricePerUnitLabel": "{unit} Ki Qeemat",
+  "@pricePerUnitLabel": {
+    "placeholders": { "unit": { "type": "String" } }
+  },
+  "addToBill": "Bill Mein Shamil Karein",
+  "unitPiece": "Adad",
+  "unitDozen": "Dozen",
+  "unitKg": "Kilo",
+  "unitGram": "Gram",
+  "unitLitre": "Litre",
+  "unitMeter": "Meter",
+  "unitCustom": "Doosra",
+
+  "newBillTitle": "Naya Bill",
+  "khataTag": "Khata",
+  "manualLabel": "Likhein",
+  "calculateTotal": "Jama Karain",
+
+  "noisyPrompt": "Saaf sunai nahi diya — dobara koshish karein",
+  "listeningEllipsis": "Sun raha hai…",
+  "tapMicToRetry": "Dobara bolne ke liye mic dabayein",
+
+  "billTotalLabel": "Kul Raqam",
+  "listenAgain": "Dobara Sunein",
+  "editItems": "Cheezein Tabdeel Karein",
+  "confirmBill": "Bill Confirm Karein",
+  "totalReadBackSpeech": "Kul raqam {amount} rupay hai",
+  "@totalReadBackSpeech": {
+    "placeholders": { "amount": { "type": "int" } }
+  },
+
+  "selectCustomerTitle": "Grahak Chunain",
+  "newCustomerTitle": "Naya Grahak",
+  "customerNameLabel": "Grahak Ka Naam",
+  "customerPhoneLabel": "Phone Number",
+  "noCustomersYet": "Abhi koi grahak nahi — khata shuru karne ke liye ek shamil karein",
+  "createKhataButton": "Grahak Shamil Karein",
+
+  "howWillTheyPay": "Payment Kaise Hogi?",
+  "paymentCash": "Nakad",
+  "paymentKhata": "Khata",
+  "previousBalance": "Purana baqaya: {balance}",
+  "@previousBalance": {
+    "placeholders": { "balance": { "type": "String" } }
+  },
+
+  "billSavedTitle": "Bill Save Ho Gaya",
+  "billSavedBody": "Bill kamyabi se save ho gaya hai.",
+  "newBillButton": "Naya Bill",
+
+  "khataListTitle": "Khata",
+  "sortByBalance": "Zyada Baqaya",
+  "sortByRecent": "Haliya",
+  "takePhoto": "Tasveer Lein",
+  "chooseFromGallery": "Gallery Se Chunain",
+  "tapToAddPhoto": "Tasveer shamil karne ke liye dabayein",
+  "addCnicPhoto": "CNIC ki tasveer shamil karein (ikhtiyari)",
+  "retakePhoto": "Dobara Tasveer Lein",
+  "customerOwesLabel": "Grahak Ke Zimme",
+  "customerClearLabel": "Baqaya Saaf Hai",
+  "shopOwesCustomerLabel": "Aap Ke Zimme",
+  "noLedgerEntriesYet": "Is grahak ke liye abhi koi len den nahi",
+  "ledgerSaleOnKhata": "Khaty Par Farokht",
+  "ledgerPaymentReceived": "Payment Mil Gayi",
+  "recordPaymentButton": "Payment Darj Karein",
+  "recordPaymentTitle": "Payment Darj Karein",
+  "paymentFromLabel": "{name} Ki Payment",
+  "@paymentFromLabel": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "receiptTitle": "Receipt",
+  "shareViaWhatsApp": "WhatsApp Par Bhejein",
+  "printReceipt": "Receipt Print Karein",
+  "bluetoothPermissionDenied": "Print karne ke liye Bluetooth ki ijazat chahiye",
+  "noPairedPrinters": "Koi printer nahi mila — pehle Bluetooth settings mein printer jorein",
+  "printerConnectFailed": "Printer se rabta nahi ho saka — dobara koshish karein",
+
+  "reportsTitle": "Reports",
+  "todaysSales": "Aaj Ki Farokht",
+  "thisWeeksSales": "Is Hafte Ki Farokht",
+  "khataOutstandingLabel": "Kul Khata Baqaya",
+  "recentBillsLabel": "Haliya Bill",
+  "noBillsYet": "Abhi koi bill nahi",
+
+  "settingsTitle": "Settings",
+  "shopProfileLabel": "Dukaan Ki Maloomat",
+  "languageLabel": "Zubaan",
+  "darkThemeLabel": "Dark Theme",
+  "syncStatusLabel": "Sync Status",
+  "syncNowButton": "Abhi Sync Karein",
+  "syncStatusIdle": "Abhi tak sync nahi hua",
+  "syncStatusInProgress": "Sync ho raha hai…",
+  "syncStatusOffline": "Aap offline hain — sab kuch is device par mehfooz hai aur online aate hi sync ho jayega.",
+  "syncStatusError": "Sync nahi ho saka — dobara khud-kaar koshish ki jayegi.",
+  "syncLastSyncedLabel": "Aakhri Sync",
+
+  "billSavedOfflineToast": "Bill mehfooz ho gaya (offline)",
+  "receiptSentWhatsAppToast": "Receipt WhatsApp par bhej di gayi",
+  "offlineWillSyncToast": "Internet nahi hai — baad mein sync ho jayega",
+
+  "overdueReminderTitle": "{name} — {days} din se waajib-ul-ada",
+  "@overdueReminderTitle": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "days": { "type": "int" }
+    }
+  },
+  "overdueReminderBody": "{amount} waajib-ul-ada hain. Yaad dahani bhejein?",
+  "@overdueReminderBody": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "overdueReminderGroupTitle": "{count} customers 30+ din se waajib-ul-ada",
+  "@overdueReminderGroupTitle": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "remindersChannelName": "Khata Yaad Dahaniyan",
+  "remindersChannelDescription": "Waajib-ul-ada khata balance wale customers ki yaad dahaniyan.",
+  "viewKhataAction": "Khata Dekhein",
+  "laterReminderAction": "Baad Mein"
+}

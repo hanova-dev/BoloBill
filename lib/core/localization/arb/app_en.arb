@@ -1,0 +1,193 @@
+{
+  "@@locale": "en",
+  "appName": "BoloBill",
+  "@appName": {
+    "description": "Brand name — never translated (SRS §11.1: phonetically simple in all three languages)."
+  },
+  "appTagline": "Speak and make a bill",
+  "@appTagline": {
+    "description": "SRS §11.1 tagline, 'Bolo aur Bill Banao', localized per language."
+  },
+  "chooseYourLanguage": "CHOOSE YOUR LANGUAGE",
+  "languageUrdu": "Urdu",
+  "languageRomanUrdu": "Roman Urdu",
+  "languageEnglish": "English",
+  "themeDarkLabel": "Dark Theme",
+  "themeLightLabel": "Light Theme",
+  "placeholderTitle": "Theme & Language Check",
+  "placeholderBody": "This screen proves theme and language switching work end-to-end before any real feature is built.",
+  "placeholderSampleAmountLabel": "BILL TOTAL",
+  "placeholderSampleAmount": "Rs. 1,270",
+
+  "signInFailedMessage": "Sign-in didn't work — please try again",
+  "createAccountTitle": "Create Your Account",
+  "chooseAMethod": "Choose a method",
+  "continueWithGoogle": "Continue with Google",
+  "continueWithPhone": "Continue with Phone Number",
+  "googlePrivacyNote": "We only use your name and email from Google — nothing will be posted.",
+
+  "enterNumberTitle": "Enter Number",
+  "mobileNumberLabel": "MOBILE NUMBER",
+  "sendOtp": "Send OTP",
+  "continueLabel": "Continue",
+
+  "enterCodeTitle": "Enter Code",
+  "otpSentTo": "Code sent to {phone}",
+  "@otpSentTo": {
+    "placeholders": { "phone": { "type": "String" } }
+  },
+  "otpIncorrectMessage": "That code doesn't look right — try again",
+  "verifyLabel": "Verify",
+
+  "chooseShopTitle": "Choose Your Shop",
+  "chooseShopSubtitle": "Tap a picture that matches your shop",
+  "businessTypeGrocery": "Grocery",
+  "businessTypeTeaStall": "Tea Stall",
+  "businessTypeVegetableCart": "Vegetable Cart",
+  "businessTypeTailor": "Tailor",
+  "businessTypeBakery": "Bakery",
+  "businessTypeGeneralStore": "General Store",
+  "businessTypeOther": "Other",
+
+  "micPermissionDenied": "Microphone access is needed to speak — you can still type instead",
+  "micUnavailable": "Voice isn't available on this device right now — please type instead",
+  "sayYourShopName": "Say your shop's name",
+  "shopNameHint": "Your shop's name",
+  "heardItCorrect": "Heard it — correct?",
+
+  "setupCompleteTitle": "You're all set!",
+  "setupCompleteBody": "Your shop is ready. Let's make your first bill.",
+  "startBillingButton": "Start Billing",
+
+  "todayLabel": "Today",
+  "startNewBill": "Start a new bill",
+  "tapMicOrManual": "Tap the mic to speak, or enter items manually",
+  "enterManually": "Enter Manually",
+
+  "confirmVoiceEntryTitle": "Confirm Entry",
+  "manualEntryTitle": "Add Item",
+  "lowConfidenceBanner": "Didn't catch that clearly — please check and correct",
+  "itemNameLabel": "ITEM NAME",
+  "unitLabel": "UNIT",
+  "quantityLabel": "QUANTITY",
+  "pricePerUnitLabel": "PRICE PER {unit}",
+  "@pricePerUnitLabel": {
+    "placeholders": { "unit": { "type": "String" } }
+  },
+  "addToBill": "Add to Bill",
+  "unitPiece": "Piece",
+  "unitDozen": "Dozen",
+  "unitKg": "Kg",
+  "unitGram": "Gram",
+  "unitLitre": "Litre",
+  "unitMeter": "Meter",
+  "unitCustom": "Other",
+
+  "newBillTitle": "New Bill",
+  "khataTag": "Khata",
+  "manualLabel": "Manual",
+  "calculateTotal": "Jama Karain",
+
+  "noisyPrompt": "Couldn't hear that clearly — please try again",
+  "listeningEllipsis": "Listening…",
+  "tapMicToRetry": "Tap the mic to speak again",
+
+  "billTotalLabel": "BILL TOTAL",
+  "listenAgain": "Listen Again",
+  "editItems": "Edit Items",
+  "confirmBill": "Confirm Bill",
+  "totalReadBackSpeech": "The total is {amount} rupees",
+  "@totalReadBackSpeech": {
+    "placeholders": { "amount": { "type": "int" } }
+  },
+
+  "selectCustomerTitle": "Select Customer",
+  "newCustomerTitle": "New Customer",
+  "customerNameLabel": "CUSTOMER NAME",
+  "customerPhoneLabel": "PHONE NUMBER",
+  "noCustomersYet": "No customers yet — add one to start a khata",
+  "createKhataButton": "Add Customer",
+
+  "howWillTheyPay": "How will they pay?",
+  "paymentCash": "Cash",
+  "paymentKhata": "Khata",
+  "previousBalance": "Previous balance: {balance}",
+  "@previousBalance": {
+    "placeholders": { "balance": { "type": "String" } }
+  },
+
+  "billSavedTitle": "Bill Saved",
+  "billSavedBody": "The bill was saved successfully.",
+  "newBillButton": "New Bill",
+
+  "khataListTitle": "Khata",
+  "sortByBalance": "Highest Balance",
+  "sortByRecent": "Most Recent",
+  "takePhoto": "Take Photo",
+  "chooseFromGallery": "Choose from Gallery",
+  "tapToAddPhoto": "Tap to add a photo",
+  "addCnicPhoto": "Add CNIC photo (optional)",
+  "retakePhoto": "Retake Photo",
+  "customerOwesLabel": "CUSTOMER OWES",
+  "customerClearLabel": "BALANCE CLEAR",
+  "shopOwesCustomerLabel": "YOU OWE CUSTOMER",
+  "noLedgerEntriesYet": "No transactions yet for this customer",
+  "ledgerSaleOnKhata": "Sale on Khata",
+  "ledgerPaymentReceived": "Payment Received",
+  "recordPaymentButton": "Record Payment",
+  "recordPaymentTitle": "Record Payment",
+  "paymentFromLabel": "Payment from {name}",
+  "@paymentFromLabel": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "receiptTitle": "Receipt",
+  "shareViaWhatsApp": "Share via WhatsApp",
+  "printReceipt": "Print Receipt",
+  "bluetoothPermissionDenied": "Bluetooth access is needed to print",
+  "noPairedPrinters": "No paired printers found — pair one in Bluetooth settings first",
+  "printerConnectFailed": "Couldn't connect to the printer — please try again",
+
+  "reportsTitle": "Reports",
+  "todaysSales": "TODAY'S SALES",
+  "thisWeeksSales": "THIS WEEK'S SALES",
+  "khataOutstandingLabel": "TOTAL KHATA OUTSTANDING",
+  "recentBillsLabel": "RECENT BILLS",
+  "noBillsYet": "No bills yet",
+
+  "settingsTitle": "Settings",
+  "shopProfileLabel": "SHOP PROFILE",
+  "languageLabel": "LANGUAGE",
+  "darkThemeLabel": "Dark Theme",
+  "syncStatusLabel": "SYNC STATUS",
+  "syncNowButton": "Sync Now",
+  "syncStatusIdle": "Not synced yet",
+  "syncStatusInProgress": "Syncing…",
+  "syncStatusOffline": "You're offline — everything stays saved on this device and will sync when you're back online.",
+  "syncStatusError": "Couldn't sync — will try again automatically.",
+  "syncLastSyncedLabel": "Last synced",
+
+  "billSavedOfflineToast": "Bill saved (offline)",
+  "receiptSentWhatsAppToast": "Receipt sent via WhatsApp",
+  "offlineWillSyncToast": "No internet — will sync later",
+
+  "overdueReminderTitle": "{name} — overdue {days} days",
+  "@overdueReminderTitle": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "days": { "type": "int" }
+    }
+  },
+  "overdueReminderBody": "{amount} owed. Send a reminder?",
+  "@overdueReminderBody": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "overdueReminderGroupTitle": "{count} customers overdue 30+ days",
+  "@overdueReminderGroupTitle": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "remindersChannelName": "Khata Reminders",
+  "remindersChannelDescription": "Reminders about customers with overdue khata balances.",
+  "viewKhataAction": "View Khata",
+  "laterReminderAction": "Later"
+}

@@ -1,0 +1,46 @@
+rules_version = '2';
+
+// BoloBill Firestore security rules (SRS §5.3 Sync Manager, build order
+// step 7). Layout matches lib/data/remote/firestore_paths.dart: every shop's
+// data lives under shops/{shopId}, with users/customers/bills/khataEntries/
+// payments/receipts as subcollections (bills embed their line items — see
+// db_schema.dart's note on why there is no separate billItems collection).
+//
+// Access model: a shop is owned by exactly one Firebase Auth uid, recorded
+// as `owner_uid` on the shop document at creation (the SRS assumes one shop
+// per device/install — no multi-staff real-time collaboration is being
+// synced yet, only the owner's own device). Every read/write anywhere under
+// a shop's subtree requires being signed in as that shop's owner.
+//
+// NOTE FOR DEPLOYMENT: this file is source-controlled but has NOT been
+// deployed — deploy from an account with access to the `bolo-bill` Firebase
+// project via `firebase deploy --only firestore:rules` (or paste into the
+// Firebase Console's Rules editor) before relying on real sync in
+// production. Until deployed, Firestore's default rules apply, which deny
+// all client access — sync calls will fail with permission-denied.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isShopOwner(shopId) {
+      return isSignedIn() &&
+        get(/databases/$(database)/documents/shops/$(shopId)).data.owner_uid == request.auth.uid;
+    }
+
+    match /shops/{shopId} {
+      allow read, update: if isShopOwner(shopId);
+      // The shop doc doesn't exist yet on first sync, so ownership can't be
+      // checked via get() — instead the created doc must self-declare the
+      // signed-in user as its owner.
+      allow create: if isSignedIn() && request.resource.data.owner_uid == request.auth.uid;
+      allow delete: if false;
+
+      match /{collection}/{docId} {
+        allow read, write: if isShopOwner(shopId);
+      }
+    }
+  }
+}

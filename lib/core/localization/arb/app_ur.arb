@@ -1,0 +1,187 @@
+{
+  "@@locale": "ur",
+  "appName": "BoloBill",
+  "appTagline": "بولو اور بل بناؤ",
+  "chooseYourLanguage": "اپنی زبان چنیں",
+  "languageUrdu": "اردو",
+  "languageRomanUrdu": "رومن اردو",
+  "languageEnglish": "انگریزی",
+  "themeDarkLabel": "ڈارک تھیم",
+  "themeLightLabel": "لائٹ تھیم",
+  "placeholderTitle": "تھیم اور زبان چیک",
+  "placeholderBody": "یہ اسکرین ثابت کرتی ہے کہ اصل فیچرز بننے سے پہلے تھیم اور زبان کی تبدیلی درست کام کر رہی ہے۔",
+  "placeholderSampleAmountLabel": "کل رقم",
+  "placeholderSampleAmount": "1,270 روپے",
+
+  "signInFailedMessage": "سائن ان نہیں ہو سکا — دوبارہ کوشش کریں",
+  "createAccountTitle": "اپنا اکاؤنٹ بنائیں",
+  "chooseAMethod": "ایک طریقہ چنیں",
+  "continueWithGoogle": "گوگل سے جاری رکھیں",
+  "continueWithPhone": "فون نمبر سے جاری رکھیں",
+  "googlePrivacyNote": "گوگل سے صرف نام اور ای میل لیا جائے گا — کوئی پوسٹ نہیں ہوگی۔",
+
+  "enterNumberTitle": "نمبر لکھیں",
+  "mobileNumberLabel": "موبائل نمبر",
+  "sendOtp": "او ٹی پی بھیجیں",
+  "continueLabel": "آگے بڑھیں",
+
+  "enterCodeTitle": "کوڈ درج کریں",
+  "otpSentTo": "کوڈ {phone} پر بھیجا گیا",
+  "@otpSentTo": {
+    "placeholders": { "phone": { "type": "String" } }
+  },
+  "otpIncorrectMessage": "یہ کوڈ درست نہیں لگتا — دوبارہ کوشش کریں",
+  "verifyLabel": "تصدیق کریں",
+
+  "chooseShopTitle": "اپنی دکان چنیں",
+  "chooseShopSubtitle": "اپنی دکان جیسی تصویر پر دبائیں",
+  "businessTypeGrocery": "کریانہ",
+  "businessTypeTeaStall": "چائے کا کھوکھا",
+  "businessTypeVegetableCart": "سبزی کارٹ",
+  "businessTypeTailor": "درزی",
+  "businessTypeBakery": "بیکری",
+  "businessTypeGeneralStore": "جنرل اسٹور",
+  "businessTypeOther": "دیگر",
+
+  "micPermissionDenied": "بولنے کے لیے مائیک کی اجازت درکار ہے — آپ ٹائپ بھی کر سکتے ہیں",
+  "micUnavailable": "اس ڈیوائس پر آواز فی الحال دستیاب نہیں — براہ کرم ٹائپ کریں",
+  "sayYourShopName": "دکان کا نام بولیں",
+  "shopNameHint": "آپ کی دکان کا نام",
+  "heardItCorrect": "سن لیا — ٹھیک ہے؟",
+
+  "setupCompleteTitle": "سب تیار ہے!",
+  "setupCompleteBody": "آپ کی دکان تیار ہے۔ آئیں پہلا بل بنائیں۔",
+  "startBillingButton": "بلنگ شروع کریں",
+
+  "todayLabel": "آج",
+  "startNewBill": "نیا بل بنائیں",
+  "tapMicOrManual": "بولنے کے لیے مائیک دبائیں، یا خود لکھیں",
+  "enterManually": "خود لکھیں",
+
+  "confirmVoiceEntryTitle": "تصدیق کریں",
+  "manualEntryTitle": "چیز شامل کریں",
+  "lowConfidenceBanner": "صاف سنائی نہیں دیا — چیک کر کے درست کریں",
+  "itemNameLabel": "چیز کا نام",
+  "unitLabel": "یونٹ",
+  "quantityLabel": "مقدار",
+  "pricePerUnitLabel": "{unit} کی قیمت",
+  "@pricePerUnitLabel": {
+    "placeholders": { "unit": { "type": "String" } }
+  },
+  "addToBill": "بل میں شامل کریں",
+  "unitPiece": "عدد",
+  "unitDozen": "درجن",
+  "unitKg": "کلو",
+  "unitGram": "گرام",
+  "unitLitre": "لیٹر",
+  "unitMeter": "میٹر",
+  "unitCustom": "دیگر",
+
+  "newBillTitle": "نیا بل",
+  "khataTag": "کھاتہ",
+  "manualLabel": "لکھیں",
+  "calculateTotal": "جمع کریں",
+
+  "noisyPrompt": "صاف سنائی نہیں دیا — دوبارہ کوشش کریں",
+  "listeningEllipsis": "سن رہا ہے…",
+  "tapMicToRetry": "دوبارہ بولنے کے لیے مائیک دبائیں",
+
+  "billTotalLabel": "کل رقم",
+  "listenAgain": "دوبارہ سنیں",
+  "editItems": "چیزیں تبدیل کریں",
+  "confirmBill": "بل کی تصدیق کریں",
+  "totalReadBackSpeech": "کل رقم {amount} روپے ہے",
+  "@totalReadBackSpeech": {
+    "placeholders": { "amount": { "type": "int" } }
+  },
+
+  "selectCustomerTitle": "گاہک چنیں",
+  "newCustomerTitle": "نیا گاہک",
+  "customerNameLabel": "گاہک کا نام",
+  "customerPhoneLabel": "فون نمبر",
+  "noCustomersYet": "ابھی کوئی گاہک نہیں — کھاتہ شروع کرنے کے لیے ایک شامل کریں",
+  "createKhataButton": "گاہک شامل کریں",
+
+  "howWillTheyPay": "ادائیگی کیسے ہوگی؟",
+  "paymentCash": "نقد",
+  "paymentKhata": "کھاتہ",
+  "previousBalance": "پرانا بقایا: {balance}",
+  "@previousBalance": {
+    "placeholders": { "balance": { "type": "String" } }
+  },
+
+  "billSavedTitle": "بل محفوظ ہو گیا",
+  "billSavedBody": "بل کامیابی سے محفوظ ہو گیا ہے۔",
+  "newBillButton": "نیا بل",
+
+  "khataListTitle": "کھاتہ",
+  "sortByBalance": "زیادہ بقایا",
+  "sortByRecent": "حالیہ",
+  "takePhoto": "تصویر لیں",
+  "chooseFromGallery": "گیلری سے چنیں",
+  "tapToAddPhoto": "تصویر شامل کرنے کے لیے دبائیں",
+  "addCnicPhoto": "شناختی کارڈ کی تصویر شامل کریں (اختیاری)",
+  "retakePhoto": "دوبارہ تصویر لیں",
+  "customerOwesLabel": "گاہک کے ذمے",
+  "customerClearLabel": "بقایا صاف ہے",
+  "shopOwesCustomerLabel": "آپ کے ذمے",
+  "noLedgerEntriesYet": "اس گاہک کے لیے ابھی کوئی لین دین نہیں",
+  "ledgerSaleOnKhata": "کھاتے پر فروخت",
+  "ledgerPaymentReceived": "ادائیگی موصول ہوئی",
+  "recordPaymentButton": "ادائیگی درج کریں",
+  "recordPaymentTitle": "ادائیگی درج کریں",
+  "paymentFromLabel": "{name} کی ادائیگی",
+  "@paymentFromLabel": {
+    "placeholders": { "name": { "type": "String" } }
+  },
+
+  "receiptTitle": "رسید",
+  "shareViaWhatsApp": "واٹس ایپ پر بھیجیں",
+  "printReceipt": "رسید پرنٹ کریں",
+  "bluetoothPermissionDenied": "پرنٹ کرنے کے لیے بلوٹوتھ کی اجازت درکار ہے",
+  "noPairedPrinters": "کوئی پرنٹر نہیں ملا — پہلے بلوٹوتھ سیٹنگز میں پرنٹر جوڑیں",
+  "printerConnectFailed": "پرنٹر سے رابطہ نہیں ہو سکا — دوبارہ کوشش کریں",
+
+  "reportsTitle": "رپورٹس",
+  "todaysSales": "آج کی فروخت",
+  "thisWeeksSales": "اس ہفتے کی فروخت",
+  "khataOutstandingLabel": "کل کھاتہ بقایا",
+  "recentBillsLabel": "حالیہ بل",
+  "noBillsYet": "ابھی کوئی بل نہیں",
+
+  "settingsTitle": "ترتیبات",
+  "shopProfileLabel": "دکان کی معلومات",
+  "languageLabel": "زبان",
+  "darkThemeLabel": "ڈارک تھیم",
+  "syncStatusLabel": "سنک اسٹیٹس",
+  "syncNowButton": "ابھی سنک کریں",
+  "syncStatusIdle": "ابھی تک سنک نہیں ہوا",
+  "syncStatusInProgress": "سنک ہو رہا ہے…",
+  "syncStatusOffline": "آپ آف لائن ہیں — سب کچھ اس ڈیوائس پر محفوظ ہے اور آن لائن آتے ہی سنک ہو جائے گا۔",
+  "syncStatusError": "سنک نہیں ہو سکا — دوبارہ خودکار کوشش کی جائے گی۔",
+  "syncLastSyncedLabel": "آخری سنک",
+
+  "billSavedOfflineToast": "بل محفوظ ہو گیا (آف لائن)",
+  "receiptSentWhatsAppToast": "رسید واٹس ایپ پر بھیج دی گئی",
+  "offlineWillSyncToast": "انٹرنیٹ نہیں ہے — بعد میں سنک ہو جائے گا",
+
+  "overdueReminderTitle": "{name} — {days} دن سے واجب الادا",
+  "@overdueReminderTitle": {
+    "placeholders": {
+      "name": { "type": "String" },
+      "days": { "type": "int" }
+    }
+  },
+  "overdueReminderBody": "{amount} واجب الادا ہیں۔ یاد دہانی بھیجیں؟",
+  "@overdueReminderBody": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "overdueReminderGroupTitle": "{count} گاہک 30+ دن سے واجب الادا",
+  "@overdueReminderGroupTitle": {
+    "placeholders": { "count": { "type": "int" } }
+  },
+  "remindersChannelName": "کھاتہ یاد دہانیاں",
+  "remindersChannelDescription": "واجب الادا کھاتہ بیلنس والے گاہکوں کی یاد دہانیاں۔",
+  "viewKhataAction": "کھاتہ دیکھیں",
+  "laterReminderAction": "بعد میں"
+}

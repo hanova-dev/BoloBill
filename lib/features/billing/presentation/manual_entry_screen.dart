@@ -1,0 +1,292 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '../../../core/localization/generated/app_localizations.dart';
+import '../../../core/theme/app_color_tokens.dart';
+import '../../../core/theme/app_radii.dart';
+import '../../../core/theme/app_typography.dart';
+import '../../../core/utils/money.dart';
+import '../../../domain/entities/enums.dart';
+import '../../../shared_widgets/bolo_chip.dart';
+import '../../../shared_widgets/numeric_keypad.dart';
+import '../../voice/slot_parser/parsed_line_item.dart';
+import '../application/billing_controller.dart';
+import '../application/draft_line_item.dart';
+import 'running_bill_screen.dart';
+
+enum _ActiveField { quantity, price }
+
+/// Screen B4 — manual entry with a fraction-aware numeric keypad
+/// (FR-3.2.4/3.2.5/3.2.6). Reached three ways: from B1 (first item), from
+/// B3 (subsequent items), or from B2 when the confidence gate (SRS §12.5)
+/// flags a voice-parsed line as needing a one-tap confirmation — [prefill]
+/// pre-populates the same fields in that case, doubling this screen as the
+/// gate's review UI rather than duplicating field-editing code. Whichever
+/// field(s) triggered the low-confidence flag get a visible warning border,
+/// so voice and manual stay genuinely equal-status: correcting a misheard
+/// entry is just editing a normal form, not a separate "fix voice" flow.
+class ManualEntryScreen extends ConsumerStatefulWidget {
+  const ManualEntryScreen({super.key, this.prefill});
+
+  final ParsedLineItem? prefill;
+
+  @override
+  ConsumerState<ManualEntryScreen> createState() => _ManualEntryScreenState();
+}
+
+class _ManualEntryScreenState extends ConsumerState<ManualEntryScreen> {
+  late final _nameController = TextEditingController(text: widget.prefill?.itemNameRaw ?? '');
+  late QuantityUnit _unit = widget.prefill?.unit ?? QuantityUnit.piece;
+  late String _quantityText = _prefillNumberText(widget.prefill?.quantity);
+  late String _priceText = _prefillNumberText(widget.prefill?.pricePerUnit.rupees);
+  _ActiveField _activeField = _ActiveField.quantity;
+
+  static String _prefillNumberText(double? value) {
+    if (value == null || value == 0) return '';
+    return value == value.roundToDouble() ? value.toStringAsFixed(0) : value.toString();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    super.dispose();
+  }
+
+  String get _activeText => _activeField == _ActiveField.quantity ? _quantityText : _priceText;
+
+  void _setActiveText(String value) {
+    setState(() {
+      if (_activeField == _ActiveField.quantity) {
+        _quantityText = value;
+      } else {
+        _priceText = value;
+      }
+    });
+  }
+
+  void _onDigit(String digit) => _setActiveText(_activeText + digit);
+
+  void _onDecimal() {
+    if (_activeText.contains('.')) return;
+    _setActiveText(_activeText.isEmpty ? '0.' : '$_activeText.');
+  }
+
+  void _onBackspace() {
+    if (_activeText.isEmpty) return;
+    _setActiveText(_activeText.substring(0, _activeText.length - 1));
+  }
+
+  void _setFraction(double value) {
+    setState(() {
+      _activeField = _ActiveField.quantity;
+      _quantityText = value == value.roundToDouble()
+          ? value.toStringAsFixed(0)
+          : value.toString();
+    });
+  }
+
+  bool get _canAdd {
+    final qty = double.tryParse(_quantityText);
+    final price = double.tryParse(_priceText);
+    return _nameController.text.trim().isNotEmpty && qty != null && qty > 0 && price != null && price >= 0;
+  }
+
+  void _addToBill() {
+    final qty = double.parse(_quantityText);
+    final price = double.parse(_priceText);
+    ref.read(billingControllerProvider.notifier).addItem(DraftLineItem(
+          itemNameRaw: _nameController.text.trim(),
+          inputMethod: InputMethod.manual,
+          quantity: qty,
+          unit: _unit,
+          pricePerUnit: Money.fromRupees(price),
+        ));
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (_) => const RunningBillScreen()),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final colors = Theme.of(context).extension<AppColorTokens>()!;
+    final type = Theme.of(context).extension<AppTypographyTokens>()!;
+
+    final prefill = widget.prefill;
+    final nameLowConfidence =
+        prefill != null && prefill.itemNameConfidence < ParsedLineItem.confidenceThreshold;
+    final quantityLowConfidence =
+        prefill != null && prefill.quantityConfidence < ParsedLineItem.confidenceThreshold;
+    final priceLowConfidence =
+        prefill != null && prefill.priceConfidence < ParsedLineItem.confidenceThreshold;
+
+    return Scaffold(
+      appBar: AppBar(title: Text(prefill != null ? l10n.confirmVoiceEntryTitle : l10n.manualEntryTitle)),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (prefill != null && prefill.needsConfirmation) ...[
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colors.alertSoft,
+                    borderRadius: BorderRadius.circular(AppRadii.md),
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(Icons.hearing_disabled, color: colors.alert, size: 18),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          l10n.lowConfidenceBanner,
+                          style: type.caption.copyWith(color: colors.alert),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 14),
+              ],
+              Text(l10n.itemNameLabel, style: type.eyebrow.copyWith(color: colors.textSoft)),
+              const SizedBox(height: 6),
+              TextField(
+                controller: _nameController,
+                onChanged: (_) => setState(() {}),
+                style: type.bodyEmphasis.copyWith(color: colors.text),
+                decoration: InputDecoration(
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(AppRadii.md),
+                    borderSide: BorderSide(color: nameLowConfidence ? colors.alert : colors.cardBorder, width: nameLowConfidence ? 2 : 1.5),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 14),
+              Text(l10n.unitLabel, style: type.eyebrow.copyWith(color: colors.textSoft)),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                runSpacing: 6,
+                children: QuantityUnit.values.map((u) {
+                  return BoloChip(
+                    label: _unitLabel(l10n, u),
+                    selected: _unit == u,
+                    onTap: () => setState(() => _unit = u),
+                  );
+                }).toList(),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                children: [
+                  Expanded(
+                    child: _NumberField(
+                      label: l10n.quantityLabel,
+                      value: _quantityText,
+                      active: _activeField == _ActiveField.quantity,
+                      lowConfidence: quantityLowConfidence,
+                      onTap: () => setState(() => _activeField = _ActiveField.quantity),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Expanded(
+                    child: _NumberField(
+                      label: l10n.pricePerUnitLabel(_unitLabel(l10n, _unit)),
+                      value: _priceText,
+                      active: _activeField == _ActiveField.price,
+                      lowConfidence: priceLowConfidence,
+                      onTap: () => setState(() => _activeField = _ActiveField.price),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                children: [
+                  BoloChip(label: '¼', selected: false, onTap: () => _setFraction(0.25)),
+                  const SizedBox(width: 6),
+                  BoloChip(label: '½', selected: false, onTap: () => _setFraction(0.5)),
+                  const SizedBox(width: 6),
+                  BoloChip(label: '¾', selected: false, onTap: () => _setFraction(0.75)),
+                  const SizedBox(width: 6),
+                  BoloChip(label: '1', selected: false, onTap: () => _setFraction(1)),
+                ],
+              ),
+              const SizedBox(height: 14),
+              NumericKeypad(
+                onDigit: _onDigit,
+                onBackspace: _onBackspace,
+                leadingKeyLabel: '.',
+                onLeadingKeyTap: _onDecimal,
+              ),
+              const SizedBox(height: 18),
+              ElevatedButton.icon(
+                onPressed: _canAdd ? _addToBill : null,
+                icon: const Icon(Icons.add),
+                label: Text(l10n.addToBill),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String _unitLabel(AppLocalizations l10n, QuantityUnit unit) => switch (unit) {
+        QuantityUnit.piece => l10n.unitPiece,
+        QuantityUnit.dozen => l10n.unitDozen,
+        QuantityUnit.kg => l10n.unitKg,
+        QuantityUnit.gram => l10n.unitGram,
+        QuantityUnit.litre => l10n.unitLitre,
+        QuantityUnit.meter => l10n.unitMeter,
+        QuantityUnit.custom => l10n.unitCustom,
+      };
+}
+
+class _NumberField extends StatelessWidget {
+  const _NumberField({
+    required this.label,
+    required this.value,
+    required this.active,
+    required this.onTap,
+    this.lowConfidence = false,
+  });
+
+  final String label;
+  final String value;
+  final bool active;
+  final bool lowConfidence;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = Theme.of(context).extension<AppColorTokens>()!;
+    final type = Theme.of(context).extension<AppTypographyTokens>()!;
+    final borderColor = lowConfidence ? colors.alert : (active ? colors.accent : colors.cardBorder);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label, style: type.caption.copyWith(color: colors.textSoft, fontSize: 10.5)),
+          const SizedBox(height: 5),
+          Container(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: colors.surface,
+              borderRadius: BorderRadius.circular(AppRadii.md),
+              border: Border.all(color: borderColor, width: (active || lowConfidence) ? 2 : 1.5),
+            ),
+            child: Text(
+              value.isEmpty ? '0' : value,
+              style: type.screenTitle.copyWith(color: colors.accent, fontSize: 18),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

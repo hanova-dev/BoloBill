@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "319431155252",
+    "project_id": "bolo-bill",
+    "storage_bucket": "bolo-bill.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:319431155252:android:425324d464774df2b3f461",
+        "android_client_info": {
+          "package_name": "com.bolobill.bolobill"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "319431155252-0rjgsci73esfrhn9tggm7p7f32c0s0sr.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bolobill.bolobill",
+            "certificate_hash": "b31e6d601144e2791df7acc74b9f5ba6c0844841"
+          }
+        },
+        {
+          "client_id": "319431155252-tao80ajkcnis9k3nnr368i55nsg6hvs5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAC7vgR_BwKzNiLYmU_lwK7iOthFq52deY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "319431155252-tao80ajkcnis9k3nnr368i55nsg6hvs5.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

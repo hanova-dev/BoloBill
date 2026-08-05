@@ -1,0 +1,140 @@
+name: bolobill
+description: "Voice-first billing and khata app for illiterate and low-literacy retailers"
+# The following line prevents the package from being accidentally published to
+# pub.dev using `flutter pub publish`. This is preferred for private packages.
+publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+
+# The following defines the version and build number for your application.
+# A version number is three numbers separated by dots, like 1.2.43
+# followed by an optional build number separated by a +.
+# Both the version and the builder number may be overridden in flutter
+# build by specifying --build-name and --build-number, respectively.
+# In Android, build-name is used as versionName while build-number used as versionCode.
+# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
+# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
+# Read more about iOS versioning at
+# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
+# In Windows, build-name is used as the major, minor, and patch parts
+# of the product and file versions while build-number is used as the build suffix.
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.11.0
+
+# Dependencies specify other packages that your package needs in order to work.
+# To automatically upgrade your package dependencies to the latest versions
+# consider running `flutter pub upgrade --major-versions`. Alternatively,
+# dependencies can be manually updated by changing the version numbers below to
+# the latest version available on pub.dev. To see which dependencies have newer
+# versions available, run `flutter pub outdated`.
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.8
+
+  flutter_riverpod: ^2.6.1
+  intl: ^0.20.2
+
+  # Local encrypted database (SQLCipher, AES-256) per NFR §10.2.
+  sqflite_sqlcipher: ^3.1.0
+  path: ^1.9.0
+  path_provider: ^2.1.5
+  # Android-Keystore-backed storage for the SQLCipher passphrase.
+  flutter_secure_storage: ^9.2.4
+  # Client-generated UUIDs per SRS §8.3 (offline-safe primary keys).
+  uuid: ^4.5.1
+
+  # Auth (Google Sign-In + phone OTP, SRS §5.4/§9.2) and permission requests
+  # for the onboarding flow.
+  firebase_core: ^3.9.0
+  firebase_auth: ^5.3.4
+  google_sign_in: ^6.2.2
+  permission_handler: ^11.3.1
+  # Raw shop-name voice capture on A4 (FR-3.1.4) — the full VAD/grammar/
+  # confidence-gate pipeline (SRS §12) is billing-specific and arrives in
+  # build order step 4; this is just a transcript for a freeform name field.
+  speech_to_text: ^7.0.0
+  # Jama Karain total read-back (FR-3.3.4) — mandatory, not optional.
+  flutter_tts: ^4.2.0
+  # Customer profile/CNIC photo capture for the khata module (FR-3.4.4).
+  image_picker: ^1.1.2
+  share_plus: ^12.0.2
+  print_bluetooth_thermal: ^1.2.1
+  esc_pos_utils_plus: ^2.0.4
+  cloud_firestore: ^5.6.12
+  connectivity_plus: ^7.3.1
+  flutter_local_notifications: ^22.2.0
+  shared_preferences: ^2.5.5
+
+dev_dependencies:
+  integration_test:
+    sdk: flutter
+  flutter_test:
+    sdk: flutter
+
+  # The "flutter_lints" package below contains a set of recommended lints to
+  # encourage good coding practices. The lint set provided by the package is
+  # activated in the `analysis_options.yaml` file located at the root of your
+  # package. See that file for information about deactivating specific lint
+  # rules and activating additional ones.
+  flutter_lints: ^6.0.0
+  fake_cloud_firestore: ^3.1.0
+  flutter_launcher_icons: ^0.14.4
+
+# For information on the generic Dart part of this file, see the
+# following page: https://dart.dev/tools/pub/pubspec
+
+# The following section is specific to Flutter packages.
+flutter:
+  generate: true
+
+  # The following line ensures that the Material Icons font is
+  # included with your application, so that you can use the icons in
+  # the material Icons class.
+  uses-material-design: true
+
+  # Fonts bundled locally (not fetched at runtime) so typography works with
+  # zero connectivity, consistent with the app's offline-first principle.
+  fonts:
+    - family: Poppins
+      fonts:
+        - asset: assets/fonts/Poppins-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/Poppins-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/Poppins-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/Poppins-Bold.ttf
+          weight: 700
+        - asset: assets/fonts/Poppins-ExtraBold.ttf
+          weight: 800
+    - family: SpaceGrotesk
+      fonts:
+        - asset: assets/fonts/SpaceGrotesk-Medium.ttf
+          weight: 500
+        - asset: assets/fonts/SpaceGrotesk-Medium.ttf
+          weight: 600
+        - asset: assets/fonts/SpaceGrotesk-Medium.ttf
+          weight: 700
+    - family: NotoNastaliqUrdu
+      fonts:
+        - asset: assets/fonts/NotoNastaliqUrdu-SemiBold.ttf
+          weight: 600
+        - asset: assets/fonts/NotoNastaliqUrdu-SemiBold.ttf
+          weight: 700
+
+# App launcher icon, generated via `dart run flutter_launcher_icons`.
+# The source image is already a flattened rounded-square icon with its own
+# padding, so it's used as the legacy mipmap icon as-is rather than split
+# into an adaptive foreground/background — splitting a single flattened
+# asset would zoom/crop it under Android's adaptive icon mask.
+flutter_launcher_icons:
+  android: "ic_launcher"
+  ios: false
+  image_path: "assets/icon/app_icon.png"
+  min_sdk_android: 26
