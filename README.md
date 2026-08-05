@@ -22,7 +22,7 @@ customer's khata — all without needing to read or type.
 Grab the latest APK from the [Releases page](https://github.com/hanova-dev/BoloBill/releases/latest),
 or the direct link below:
 
-**➡️ [BoloBill-v1.0.1.apk](https://github.com/hanova-dev/BoloBill/releases/download/v1.0.1/BoloBill-v1.0.1.apk)** (Android 8.0 / API 26+)
+**➡️ [BoloBill-v1.0.2.apk](https://github.com/hanova-dev/BoloBill/releases/download/v1.0.2/BoloBill-v1.0.2.apk)** (Android 8.0 / API 26+)
 
 You'll need to allow "install from unknown sources" for your browser or file
 manager, since this isn't distributed through the Play Store.
