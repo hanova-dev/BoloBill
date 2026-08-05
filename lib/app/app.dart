@@ -6,7 +6,7 @@ import '../core/localization/locale_provider.dart';
 import '../core/navigation/root_navigator_key.dart';
 import '../core/theme/app_theme.dart';
 import '../core/theme/theme_mode_provider.dart';
-import '../features/onboarding/presentation/language_select_screen.dart';
+import 'app_entrypoint.dart';
 
 class BoloBillApp extends ConsumerWidget {
   const BoloBillApp({super.key});
@@ -34,7 +34,7 @@ class BoloBillApp extends ConsumerWidget {
         textDirection: activeLocale.textDirection,
         child: child!,
       ),
-      home: const LanguageSelectScreen(),
+      home: const AppEntrypoint(),
     );
   }
 }

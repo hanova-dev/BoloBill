@@ -107,20 +107,48 @@ class _VoiceListeningScreenState extends ConsumerState<VoiceListeningScreen> {
     }
 
     final locale = ref.read(localeProvider);
-    final speechLocaleId = switch (locale) {
+    final preferredLocaleId = switch (locale) {
       AppLocale.urdu => 'ur_PK',
       AppLocale.romanUrdu || AppLocale.english => 'en_US',
     };
+    final languagePrefix = switch (locale) {
+      AppLocale.urdu => 'ur',
+      AppLocale.romanUrdu || AppLocale.english => 'en',
+    };
 
     // Not every device ships speech recognition for every language — Urdu
-    // in particular isn't universally available. Checking first means an
-    // unsupported language surfaces as a clear "voice isn't available"
-    // message instead of an opaque recognizer error after tapping the mic.
+    // in particular isn't universally available — so this checks first
+    // rather than surfacing an opaque recognizer error after tapping the
+    // mic. Two things real-device testing found the original exact-match
+    // version got wrong: (1) `locales()` is itself unreliable on some
+    // devices/plugin versions, coming back empty even though recognition
+    // works fine — an empty list is now treated as "unknown, proceed"
+    // rather than "unavailable"; (2) real phones report all sorts of
+    // regional variants (en_GB, en_IN, en_PK, ...), so matching is now
+    // language-family-based rather than requiring the literal 'en_US' or
+    // 'ur_PK' string, which was rejecting working voice recognition on
+    // real devices outside the US/Pakistan-exact locale.
     final available = await _speech.locales();
-    if (!available.any((l) => l.localeId == speechLocaleId)) {
+    stt.LocaleName? matched;
+    for (final l in available) {
+      if (l.localeId == preferredLocaleId) {
+        matched = l;
+        break;
+      }
+    }
+    if (matched == null) {
+      for (final l in available) {
+        if (l.localeId.toLowerCase().startsWith(languagePrefix)) {
+          matched = l;
+          break;
+        }
+      }
+    }
+    if (available.isNotEmpty && matched == null) {
       if (mounted) setState(() => _errorMessage = l10n.micUnavailable);
       return;
     }
+    final speechLocaleId = matched?.localeId ?? preferredLocaleId;
 
     setState(() {
       _listening = true;

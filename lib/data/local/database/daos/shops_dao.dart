@@ -18,6 +18,14 @@ class ShopsDao {
     return rows.isEmpty ? null : Shop.fromMap(rows.first);
   }
 
+  /// One shop per device/install (SRS §9.1) — used at app startup to resume
+  /// straight into billing on a device that's already been set up, instead
+  /// of re-running onboarding every launch.
+  Future<Shop?> getFirst() async {
+    final rows = await _db.query('shops', limit: 1);
+    return rows.isEmpty ? null : Shop.fromMap(rows.first);
+  }
+
   /// Used to detect an existing account during phone-OTP sign-in (FR-3.1.2).
   Future<Shop?> getByOwnerPhone(String ownerPhone) async {
     final rows =

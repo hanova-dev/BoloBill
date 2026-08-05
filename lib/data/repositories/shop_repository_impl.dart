@@ -18,6 +18,9 @@ class ShopRepositoryImpl implements ShopRepository {
   Future<Shop?> findByOwnerPhone(String ownerPhone) => _dao.getByOwnerPhone(ownerPhone);
 
   @override
+  Future<Shop?> getLocalShop() => _dao.getFirst();
+
+  @override
   Future<void> updatePreferredLanguage(String shopId, AppLocale language) =>
       _dao.updatePreferredLanguage(shopId, language);
 }

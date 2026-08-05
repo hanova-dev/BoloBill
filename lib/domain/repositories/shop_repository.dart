@@ -9,6 +9,11 @@ abstract interface class ShopRepository {
   /// Used during phone sign-in to detect an existing account (FR-3.1.2).
   Future<Shop?> findByOwnerPhone(String ownerPhone);
 
+  /// The device's already-onboarded shop, if any (one shop per device/
+  /// install — SRS §9.1). Used at app startup to skip onboarding and resume
+  /// straight into billing.
+  Future<Shop?> getLocalShop();
+
   /// FR-3.6.1: changeable at any time from settings.
   Future<void> updatePreferredLanguage(String shopId, AppLocale language);
 }
