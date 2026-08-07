@@ -103,10 +103,27 @@ abstract final class DomainGrammar {
 
   /// Parses a single token as a plain integer/decimal — digits only, no
   /// word lookup (see [parseNumberWords] for the spelled-out fallback).
+  ///
+  /// A token that's *purely* digits always parses. A digit run glued to a
+  /// recognized unit word also parses with that suffix stripped — Android's
+  /// recognizer sometimes emits "25kg" as one token instead of "25 kg" as
+  /// two — but a digit run glued to anything else does not: brand names
+  /// routinely embed a digit ("7up", "3M", "5star"), and blindly stripping
+  /// every non-digit character used to read the "7" out of "7up" as a real
+  /// number, which then got treated as an actual price or quantity next to
+  /// a marker word ("7up ki bottle 120 ki" priced itself at Rs. 7 instead of
+  /// 120). An unrecognized suffix means this is product-name text, not a
+  /// number someone said out loud.
   static double? parseDigits(String token) {
-    final cleaned = token.replaceAll(RegExp(r'[^\d.]'), '');
-    if (cleaned.isEmpty) return null;
-    return double.tryParse(cleaned);
+    final trimmed = token.trim();
+    if (RegExp(r'^\d+(\.\d+)?$').hasMatch(trimmed)) {
+      return double.tryParse(trimmed);
+    }
+    final match = RegExp(r'^(\d+(?:\.\d+)?)([a-zA-Z؀-ۿ]+)$').firstMatch(trimmed);
+    if (match != null && unitWords.containsKey(normalize(match.group(2)!))) {
+      return double.tryParse(match.group(1)!);
+    }
+    return null;
   }
 
   /// Parses a run of number words (e.g. ["teen", "sau"] -> 300,

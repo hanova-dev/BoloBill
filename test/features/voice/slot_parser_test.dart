@@ -116,6 +116,13 @@ void main() {
       expect(parsed.pricePerUnit.rupees, 350.0);
       expect(parsed.needsConfirmation, isFalse);
     });
+
+    test('a brand name with an embedded digit ("7up") does not get misread as a price', () {
+      final parsed = SlotParser.parse('7up ki bottle 120 ki');
+
+      expect(parsed.pricePerUnit.rupees, 120.0);
+      expect(parsed.itemNameRaw, contains('7up'));
+    });
   });
 
   group('flat / package pricing — no unit word spoken at all', () {

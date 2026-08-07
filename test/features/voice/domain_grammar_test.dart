@@ -37,12 +37,23 @@ void main() {
       expect(DomainGrammar.parseDigits('0.5'), 0.5);
     });
 
-    test('strips stray non-digit characters and parses what remains', () {
+    test('strips a recognized unit suffix glued to the digits ("25kg" as one ASR token)', () {
       expect(DomainGrammar.parseDigits('25kg'), 25.0);
+      expect(DomainGrammar.parseDigits('2litre'), 2.0);
     });
 
     test('returns null when there are no digits at all', () {
       expect(DomainGrammar.parseDigits('teen'), isNull);
+    });
+
+    test('does not read a number out of a brand name that happens to contain digits', () {
+      // "7up ki bottle 120 ki" was pricing itself at Rs. 7 (the "7" read out
+      // of "7up") instead of Rs. 120 before this was fixed — an
+      // unrecognized suffix means it's product-name text, not a spoken
+      // number.
+      expect(DomainGrammar.parseDigits('7up'), isNull);
+      expect(DomainGrammar.parseDigits('3M'), isNull);
+      expect(DomainGrammar.parseDigits('5star'), isNull);
     });
   });
 
