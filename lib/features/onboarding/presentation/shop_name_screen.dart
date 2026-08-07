@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -39,8 +41,17 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
   String? _micError;
   bool _completing = false;
 
+  /// Same safety net as [VoiceListeningScreen] (B2) — on-device testing
+  /// found the platform recognizer can start listening and then never fire
+  /// any callback at all, leaving the mic stuck "listening" forever with no
+  /// way out. A4 never had this guard even though it shares the exact same
+  /// underlying `speech_to_text` call.
+  static const _listenTimeout = Duration(seconds: 15);
+  Timer? _listenTimeoutTimer;
+
   @override
   void dispose() {
+    _listenTimeoutTimer?.cancel();
     _speech.stop();
     _nameController.dispose();
     super.dispose();
@@ -58,10 +69,24 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
 
     if (!_speechAvailable) {
       _speechAvailable = await _speech.initialize(
-        onError: (error) => setState(() => _micError = error.errorMsg),
+        // speech_to_text's error codes ("error_speech_timeout",
+        // "error_no_match", ...) are internal platform identifiers, not
+        // user-facing text — showing them raw to a low-literacy retailer
+        // defeats the point of a voice-first app. Every error, from the
+        // engine or from the timeout below, collapses to the same one
+        // friendly retry prompt already used on B2.
+        onError: (error) {
+          if (!mounted) return;
+          _listenTimeoutTimer?.cancel();
+          setState(() {
+            _micError = l10n.noisyPrompt;
+            _listening = false;
+          });
+        },
         onStatus: (status) {
           if (status == 'done' || status == 'notListening') {
-            setState(() => _listening = false);
+            _listenTimeoutTimer?.cancel();
+            if (mounted) setState(() => _listening = false);
           }
         },
       );
@@ -72,11 +97,48 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
     }
 
     final locale = ref.read(localeProvider);
-    final speechLocaleId = switch (locale) {
+    final preferredLocaleId = switch (locale) {
       AppLocale.urdu => 'ur_PK',
       AppLocale.romanUrdu || AppLocale.english => 'en_US',
     };
+    final languagePrefix = switch (locale) {
+      AppLocale.urdu => 'ur',
+      AppLocale.romanUrdu || AppLocale.english => 'en',
+    };
+
+    // Same language-family matching as B2's voice pipeline — real devices
+    // routinely report a regional variant (en_GB, en_IN, en_PK, ...) rather
+    // than the literal en_US/ur_PK, and locales() itself is sometimes empty
+    // even on a device where recognition works fine. See
+    // VoiceListeningScreen._start for the full reasoning.
+    final available = await _speech.locales();
+    stt.LocaleName? matched;
+    for (final l in available) {
+      if (l.localeId == preferredLocaleId) {
+        matched = l;
+        break;
+      }
+    }
+    if (matched == null) {
+      for (final l in available) {
+        if (l.localeId.toLowerCase().startsWith(languagePrefix)) {
+          matched = l;
+          break;
+        }
+      }
+    }
+    if (available.isNotEmpty && matched == null) {
+      setState(() => _micError = l10n.micUnavailable);
+      return;
+    }
+    final speechLocaleId = matched?.localeId ?? preferredLocaleId;
+
     setState(() => _listening = true);
+    _listenTimeoutTimer?.cancel();
+    _listenTimeoutTimer = Timer(_listenTimeout, () {
+      _speech.stop();
+      if (mounted) setState(() => _listening = false);
+    });
     await _speech.listen(
       listenOptions: stt.SpeechListenOptions(localeId: speechLocaleId),
       onResult: (result) => setState(() => _nameController.text = result.recognizedWords),
