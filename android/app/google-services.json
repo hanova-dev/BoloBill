@@ -22,6 +22,14 @@
           }
         },
         {
+          "client_id": "319431155252-umt5rijcfh581j520bvf0enmvvr8qdue.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.bolobill.bolobill",
+            "certificate_hash": "8703bd1d7a2d7e9dd3a5a832513adda5761007e2"
+          }
+        },
+        {
           "client_id": "319431155252-tao80ajkcnis9k3nnr368i55nsg6hvs5.apps.googleusercontent.com",
           "client_type": 3
         }
