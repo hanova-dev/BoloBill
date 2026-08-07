@@ -182,6 +182,12 @@ class AppLocalizationsUr extends AppLocalizations {
   }
 
   @override
+  String get addQuantityOrWeight => 'مقدار یا وزن شامل کریں';
+
+  @override
+  String get priceLabel => 'قیمت';
+
+  @override
   String get addToBill => 'بل میں شامل کریں';
 
   @override
@@ -630,6 +636,12 @@ class AppLocalizationsUrLatn extends AppLocalizationsUr {
   String pricePerUnitLabel(String unit) {
     return '$unit Ki Qeemat';
   }
+
+  @override
+  String get addQuantityOrWeight => 'Miqdaar ya wazan shamil karein';
+
+  @override
+  String get priceLabel => 'Qeemat';
 
   @override
   String get addToBill => 'Bill Mein Shamil Karein';

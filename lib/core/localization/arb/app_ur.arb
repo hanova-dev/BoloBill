@@ -69,6 +69,8 @@
   "@pricePerUnitLabel": {
     "placeholders": { "unit": { "type": "String" } }
   },
+  "addQuantityOrWeight": "مقدار یا وزن شامل کریں",
+  "priceLabel": "قیمت",
   "addToBill": "بل میں شامل کریں",
   "unitPiece": "عدد",
   "unitDozen": "درجن",

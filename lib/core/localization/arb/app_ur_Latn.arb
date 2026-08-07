@@ -69,6 +69,8 @@
   "@pricePerUnitLabel": {
     "placeholders": { "unit": { "type": "String" } }
   },
+  "addQuantityOrWeight": "Miqdaar ya wazan shamil karein",
+  "priceLabel": "Qeemat",
   "addToBill": "Bill Mein Shamil Karein",
   "unitPiece": "Adad",
   "unitDozen": "Dozen",

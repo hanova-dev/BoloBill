@@ -429,6 +429,18 @@ abstract class AppLocalizations {
   /// **'PRICE PER {unit}'**
   String pricePerUnitLabel(String unit);
 
+  /// No description provided for @addQuantityOrWeight.
+  ///
+  /// In en, this message translates to:
+  /// **'Add quantity or weight'**
+  String get addQuantityOrWeight;
+
+  /// No description provided for @priceLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'PRICE'**
+  String get priceLabel;
+
   /// No description provided for @addToBill.
   ///
   /// In en, this message translates to:

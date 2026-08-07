@@ -184,6 +184,12 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get addQuantityOrWeight => 'Add quantity or weight';
+
+  @override
+  String get priceLabel => 'PRICE';
+
+  @override
   String get addToBill => 'Add to Bill';
 
   @override

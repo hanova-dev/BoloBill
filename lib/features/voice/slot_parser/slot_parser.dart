@@ -28,7 +28,7 @@ abstract final class SlotParser {
   /// name, when a number actually sits immediately before it. A stray
   /// "ki"/"ka" with nothing to anchor it is left alone as ordinary name
   /// text rather than assumed to be about price.
-  static const _genitivePriceWords = {'ki', 'ka', 'کی', 'کا'};
+  static const _genitivePriceWords = {'ki', 'ka', 'ke', 'kay', 'کی', 'کا', 'کے'};
 
   static ParsedLineItem parse(String rawTranscript) {
     final trimmed = rawTranscript.trim();
@@ -81,6 +81,43 @@ abstract final class SlotParser {
       break;
     }
 
+    // ---- Flat / package pricing --------------------------------------------
+    // Packaged goods are quoted as a flat price for the item, with no unit
+    // word at all: "shampoo 600 ka", "200 ka kala saban", "panadol 30 ka
+    // patta". Requiring a spoken unit before trusting the quantity meant
+    // every one of these was dragged to the confirmation screen even though
+    // the name and price were both heard perfectly — reported as "you didn't
+    // fix the issue for those prices which have a fixed rate".
+    //
+    // So: when a price was heard but no unit word was spoken anywhere, one
+    // piece is the intended quantity. A leading bare number is taken as that
+    // quantity ("1 bari bottle shampoo 600 ki" — otherwise the "1" leaks into
+    // the item name); otherwise it's an implied single item. Scored just
+    // above the gate rather than at full confidence: the price and name were
+    // genuinely heard, but the count is inferred, so it stays the weakest
+    // field and any ASR uncertainty (see [withAsrConfidence]) still pulls the
+    // whole line back under the gate.
+    final unitWasSpoken = quantityConfidence > 0;
+    if (!unitWasSpoken && priceConfidence > 0) {
+      final leading = _leadingCountBefore(tokens, consumed);
+      if (leading != null) {
+        quantity = leading.value;
+        consumed.addAll(leading.indices);
+        unit = QuantityUnit.piece;
+        quantityConfidence = 0.8;
+      } else if (!_hasUnconsumedNumber(tokens, consumed)) {
+        // Nothing number-ish left over: an unambiguous flat price for one
+        // item.
+        quantity = 1;
+        unit = QuantityUnit.piece;
+        quantityConfidence = 0.8;
+      }
+      // Otherwise a stray number is still floating in the utterance
+      // ("sugar 2 240 rupee") — that 2 could be a count, a pack size, or
+      // part of the product name, and guessing "1" would quietly record
+      // the wrong quantity. Left at zero confidence so the gate asks.
+    }
+
     final nameTokens = [
       for (var i = 0; i < tokens.length; i++)
         if (!consumed.contains(i)) tokens[i],
@@ -129,6 +166,46 @@ abstract final class SlotParser {
       quantityConfidence: parsed.quantityConfidence * factor,
       priceConfidence: parsed.priceConfidence * factor,
     );
+  }
+
+  /// Whether any leftover token still looks like a number — the signal that
+  /// a flat-price reading would be a guess rather than a safe default.
+  static bool _hasUnconsumedNumber(List<String> tokens, Set<int> consumed) {
+    for (var i = 0; i < tokens.length; i++) {
+      if (consumed.contains(i)) continue;
+      if (DomainGrammar.parseDigits(tokens[i]) != null) return true;
+      if (DomainGrammar.parseNumberWords(tokens, i) != null) return true;
+      if (DomainGrammar.fixedFractionWords.containsKey(DomainGrammar.normalize(tokens[i]))) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// A count at the very start of what's left of the utterance ("**1** bari
+  /// bottle shampoo", "**ek** packet chai) — only consulted for flat-priced
+  /// items, where there's no unit word to anchor the quantity to. Restricted
+  /// to the leading position on purpose: a number anywhere else in a name is
+  /// far more likely to be part of the product itself ("Surf Excel 500",
+  /// "7Up") than a count.
+  static ({double value, List<int> indices})? _leadingCountBefore(
+    List<String> tokens,
+    Set<int> consumed,
+  ) {
+    final first = [
+      for (var i = 0; i < tokens.length; i++)
+        if (!consumed.contains(i)) i,
+    ].firstOrNull;
+    if (first == null) return null;
+
+    final digits = DomainGrammar.parseDigits(tokens[first]);
+    if (digits != null && digits > 0) return (value: digits, indices: [first]);
+
+    final word = DomainGrammar.parseNumberWords(tokens, first);
+    if (word != null && word.consumed == 1 && word.value > 0) {
+      return (value: word.value, indices: [first]);
+    }
+    return null;
   }
 
   /// Looks immediately before [anchorIndex] (a unit or rupee word) for a

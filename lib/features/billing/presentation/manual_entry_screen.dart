@@ -37,9 +37,24 @@ class ManualEntryScreen extends ConsumerStatefulWidget {
 class _ManualEntryScreenState extends ConsumerState<ManualEntryScreen> {
   late final _nameController = TextEditingController(text: widget.prefill?.itemNameRaw ?? '');
   late QuantityUnit _unit = widget.prefill?.unit ?? QuantityUnit.piece;
-  late String _quantityText = _prefillNumberText(widget.prefill?.quantity);
+
+  /// Defaults to a single item rather than blank: most sales are one
+  /// packaged thing at a flat price, and requiring a quantity to be typed
+  /// for every one of those was the bulk of the "this screen is complex"
+  /// complaint.
+  late String _quantityText =
+      widget.prefill != null ? _prefillNumberText(widget.prefill!.quantity) : '1';
   late String _priceText = _prefillNumberText(widget.prefill?.pricePerUnit.rupees);
-  _ActiveField _activeField = _ActiveField.quantity;
+
+  /// The unit chips, quantity field and fraction row start hidden — they
+  /// only matter for weighed/counted goods. Anything voice already heard as
+  /// non-trivial (a real unit, or a quantity that isn't one) opens expanded
+  /// so a confirmation never hides a value the retailer needs to check.
+  late bool _showQuantity = widget.prefill != null &&
+      (widget.prefill!.unit != QuantityUnit.piece || widget.prefill!.quantity != 1);
+
+  late _ActiveField _activeField =
+      _showQuantity ? _ActiveField.quantity : _ActiveField.price;
 
   static String _prefillNumberText(double? value) {
     if (value == null || value == 0) return '';
@@ -164,55 +179,77 @@ class _ManualEntryScreenState extends ConsumerState<ManualEntryScreen> {
                 ),
               ),
               const SizedBox(height: 14),
-              Text(l10n.unitLabel, style: type.eyebrow.copyWith(color: colors.textSoft)),
-              const SizedBox(height: 6),
-              Wrap(
-                spacing: 6,
-                runSpacing: 6,
-                children: QuantityUnit.values.map((u) {
-                  return BoloChip(
-                    label: _unitLabel(l10n, u),
-                    selected: _unit == u,
-                    onTap: () => setState(() => _unit = u),
-                  );
-                }).toList(),
-              ),
-              const SizedBox(height: 14),
-              Row(
-                children: [
-                  Expanded(
-                    child: _NumberField(
-                      label: l10n.quantityLabel,
-                      value: _quantityText,
-                      active: _activeField == _ActiveField.quantity,
-                      lowConfidence: quantityLowConfidence,
-                      onTap: () => setState(() => _activeField = _ActiveField.quantity),
-                    ),
+              if (!_showQuantity) ...[
+                _NumberField(
+                  label: l10n.priceLabel,
+                  value: _priceText,
+                  active: true,
+                  lowConfidence: priceLowConfidence,
+                  onTap: () => setState(() => _activeField = _ActiveField.price),
+                ),
+                const SizedBox(height: 10),
+                Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: TextButton.icon(
+                    onPressed: () => setState(() {
+                      _showQuantity = true;
+                      _activeField = _ActiveField.quantity;
+                    }),
+                    icon: const Icon(Icons.add, size: 18),
+                    label: Text(l10n.addQuantityOrWeight),
                   ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: _NumberField(
-                      label: l10n.pricePerUnitLabel(_unitLabel(l10n, _unit)),
-                      value: _priceText,
-                      active: _activeField == _ActiveField.price,
-                      lowConfidence: priceLowConfidence,
-                      onTap: () => setState(() => _activeField = _ActiveField.price),
+                ),
+              ] else ...[
+                Text(l10n.unitLabel, style: type.eyebrow.copyWith(color: colors.textSoft)),
+                const SizedBox(height: 6),
+                Wrap(
+                  spacing: 6,
+                  runSpacing: 6,
+                  children: QuantityUnit.values.map((u) {
+                    return BoloChip(
+                      label: _unitLabel(l10n, u),
+                      selected: _unit == u,
+                      onTap: () => setState(() => _unit = u),
+                    );
+                  }).toList(),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _NumberField(
+                        label: l10n.quantityLabel,
+                        value: _quantityText,
+                        active: _activeField == _ActiveField.quantity,
+                        lowConfidence: quantityLowConfidence,
+                        onTap: () => setState(() => _activeField = _ActiveField.quantity),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 10),
-              Row(
-                children: [
-                  BoloChip(label: '¼', selected: false, onTap: () => _setFraction(0.25)),
-                  const SizedBox(width: 6),
-                  BoloChip(label: '½', selected: false, onTap: () => _setFraction(0.5)),
-                  const SizedBox(width: 6),
-                  BoloChip(label: '¾', selected: false, onTap: () => _setFraction(0.75)),
-                  const SizedBox(width: 6),
-                  BoloChip(label: '1', selected: false, onTap: () => _setFraction(1)),
-                ],
-              ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _NumberField(
+                        label: l10n.pricePerUnitLabel(_unitLabel(l10n, _unit)),
+                        value: _priceText,
+                        active: _activeField == _ActiveField.price,
+                        lowConfidence: priceLowConfidence,
+                        onTap: () => setState(() => _activeField = _ActiveField.price),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    BoloChip(label: '¼', selected: false, onTap: () => _setFraction(0.25)),
+                    const SizedBox(width: 6),
+                    BoloChip(label: '½', selected: false, onTap: () => _setFraction(0.5)),
+                    const SizedBox(width: 6),
+                    BoloChip(label: '¾', selected: false, onTap: () => _setFraction(0.75)),
+                    const SizedBox(width: 6),
+                    BoloChip(label: '1', selected: false, onTap: () => _setFraction(1)),
+                  ],
+                ),
+              ],
               const SizedBox(height: 14),
               NumericKeypad(
                 onDigit: _onDigit,

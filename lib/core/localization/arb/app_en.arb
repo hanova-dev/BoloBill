@@ -75,6 +75,8 @@
   "@pricePerUnitLabel": {
     "placeholders": { "unit": { "type": "String" } }
   },
+  "addQuantityOrWeight": "Add quantity or weight",
+  "priceLabel": "PRICE",
   "addToBill": "Add to Bill",
   "unitPiece": "Piece",
   "unitDozen": "Dozen",

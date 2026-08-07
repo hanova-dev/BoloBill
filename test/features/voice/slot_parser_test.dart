@@ -76,10 +76,12 @@ void main() {
       expect(parsed.itemNameRaw, 'cheeni');
       expect(parsed.pricePerUnit.rupees, 200.0);
       expect(parsed.priceConfidence, greaterThanOrEqualTo(0.9));
-      // Unit/quantity were never spoken, so the "1 piece" default still
-      // needs a confirming tap — only the price marker gap is being fixed
-      // here.
-      expect(parsed.quantityConfidence, 0.0);
+      // No unit was spoken, which for a flat-priced item means one of it —
+      // see the flat/package pricing group below. (This originally asserted
+      // a zero-confidence quantity that forced a confirm tap; that was the
+      // behavior retailers reported as broken for fixed-rate items.)
+      expect(parsed.quantity, 1.0);
+      expect(parsed.needsConfirmation, isFalse);
     });
 
     test('"ka" before the item name, with a descriptive (color) word kept as part of it', () {
@@ -104,6 +106,53 @@ void main() {
 
       expect(parsed.priceConfidence, 0.0);
       expect(parsed.itemNameRaw, contains('ki'));
+    });
+
+    test('"ke" is recognized alongside "ki"/"ka"', () {
+      final parsed = SlotParser.parse('ek dozen anday 350 ke');
+
+      expect(parsed.itemNameRaw, 'anday');
+      expect(parsed.unit, QuantityUnit.dozen);
+      expect(parsed.pricePerUnit.rupees, 350.0);
+      expect(parsed.needsConfirmation, isFalse);
+    });
+  });
+
+  group('flat / package pricing — no unit word spoken at all', () {
+    test('a flat-priced packaged item auto-fills as one piece without a confirm tap', () {
+      final parsed = SlotParser.parse('shampoo 600 ka');
+
+      expect(parsed.itemNameRaw, 'shampoo');
+      expect(parsed.quantity, 1.0);
+      expect(parsed.unit, QuantityUnit.piece);
+      expect(parsed.pricePerUnit.rupees, 600.0);
+      expect(parsed.needsConfirmation, isFalse);
+    });
+
+    test('a leading count is taken as the quantity instead of leaking into the name', () {
+      final parsed = SlotParser.parse('1 bari bottle shampoo 600 ki');
+
+      expect(parsed.itemNameRaw, 'bari bottle shampoo');
+      expect(parsed.quantity, 1.0);
+      expect(parsed.pricePerUnit.rupees, 600.0);
+      expect(parsed.needsConfirmation, isFalse);
+    });
+
+    test('a medical-store style flat price parses cleanly', () {
+      final parsed = SlotParser.parse('panadol 30 ka patta');
+
+      expect(parsed.itemNameRaw, 'panadol patta');
+      expect(parsed.pricePerUnit.rupees, 30.0);
+      expect(parsed.needsConfirmation, isFalse);
+    });
+
+    test('a stray leftover number keeps the line unconfirmed rather than guessing one', () {
+      // "2" could be a count, a pack size, or part of the product name —
+      // assuming a quantity of 1 here would quietly record the wrong number.
+      final parsed = SlotParser.parse('sugar 2 240 rupee');
+
+      expect(parsed.quantityConfidence, 0.0);
+      expect(parsed.needsConfirmation, isTrue);
     });
   });
 
