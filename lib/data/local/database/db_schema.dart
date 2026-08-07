@@ -11,7 +11,7 @@
 /// order step 7) always pushes/pulls a bill's line items embedded inside
 /// that bill's Firestore document, since they have no independent existence
 /// (always read together with their parent bill, never queried standalone).
-const int kDatabaseVersion = 1;
+const int kDatabaseVersion = 2;
 
 const List<String> kCreateTableStatementsV1 = [
   '''
@@ -96,7 +96,8 @@ const List<String> kCreateTableStatementsV1 = [
     amount INTEGER NOT NULL CHECK (amount >= 0),
     note TEXT,
     timestamp INTEGER NOT NULL,
-    synced INTEGER NOT NULL DEFAULT 0 CHECK (synced IN (0, 1))
+    synced INTEGER NOT NULL DEFAULT 0 CHECK (synced IN (0, 1)),
+    reversal_of_entry_id TEXT REFERENCES khata_entries(entry_id)
   )
   ''',
   // Drives the chronological ledger view (FR-3.4.9) and the balance-recompute
@@ -126,4 +127,13 @@ const List<String> kCreateTableStatementsV1 = [
   )
   ''',
   'CREATE INDEX idx_receipts_bill_id ON receipts(bill_id)',
+];
+
+/// v1 -> v2: adds [reversal_of_entry_id] to khata_entries so a mistakenly
+/// recorded payment can be corrected (FR-3.4.7 amendment) without ever
+/// updating or deleting the original row — a correction is a new debit
+/// entry that points back at the credit entry it offsets, preserving the
+/// append-only guarantee documented on [KhataEntriesDao].
+const List<String> kMigrationV1ToV2 = [
+  'ALTER TABLE khata_entries ADD COLUMN reversal_of_entry_id TEXT REFERENCES khata_entries(entry_id)',
 ];

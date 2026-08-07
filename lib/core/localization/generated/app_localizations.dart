@@ -525,11 +525,11 @@ abstract class AppLocalizations {
   /// **'Listening…'**
   String get listeningEllipsis;
 
-  /// No description provided for @tapMicToRetry.
+  /// No description provided for @holdMicToSpeak.
   ///
   /// In en, this message translates to:
-  /// **'Tap the mic to speak again'**
-  String get tapMicToRetry;
+  /// **'Hold the mic and speak'**
+  String get holdMicToSpeak;
 
   /// No description provided for @billTotalLabel.
   ///
@@ -723,6 +723,12 @@ abstract class AppLocalizations {
   /// **'Payment Received'**
   String get ledgerPaymentReceived;
 
+  /// No description provided for @ledgerPaymentReversed.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment Reversed'**
+  String get ledgerPaymentReversed;
+
   /// No description provided for @recordPaymentButton.
   ///
   /// In en, this message translates to:
@@ -740,6 +746,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Payment from {name}'**
   String paymentFromLabel(String name);
+
+  /// No description provided for @undoPaymentAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo Payment'**
+  String get undoPaymentAction;
+
+  /// No description provided for @undoPaymentConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo this payment?'**
+  String get undoPaymentConfirmTitle;
+
+  /// No description provided for @undoPaymentConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This reverses the {amount} payment and adds it back to the balance. This can\'t be undone.'**
+  String undoPaymentConfirmBody(String amount);
+
+  /// No description provided for @undoPaymentConfirmButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Undo Payment'**
+  String get undoPaymentConfirmButton;
+
+  /// No description provided for @cancelLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Cancel'**
+  String get cancelLabel;
+
+  /// No description provided for @paymentUndoneToast.
+  ///
+  /// In en, this message translates to:
+  /// **'Payment undone'**
+  String get paymentUndoneToast;
 
   /// No description provided for @receiptTitle.
   ///

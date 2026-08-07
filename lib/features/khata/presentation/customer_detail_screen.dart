@@ -69,6 +69,39 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
     if (recorded == true) await _refresh();
   }
 
+  Future<void> _undoPayment(KhataEntry entry) async {
+    final l10n = AppLocalizations.of(context);
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(l10n.undoPaymentConfirmTitle),
+        content: Text(l10n.undoPaymentConfirmBody(entry.amount.format())),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancelLabel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.undoPaymentConfirmButton),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true) return;
+
+    await ref.read(khataRepositoryProvider).reversePayment(
+          customerId: widget.customerId,
+          originalCreditEntry: entry,
+        );
+    if (!mounted) return;
+    await _refresh();
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(l10n.paymentUndoneToast)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
@@ -155,12 +188,30 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
                         else
                           Padding(
                             padding: const EdgeInsets.symmetric(horizontal: 18),
-                            child: Column(
-                              children: [
-                                for (final entry in ledger.reversed)
-                                  _LedgerRow(entry: entry, l10n: l10n),
-                              ],
-                            ),
+                            child: Builder(builder: (context) {
+                              final reversedEntryIds = {
+                                for (final e in ledger)
+                                  if (e.reversalOfEntryId != null) e.reversalOfEntryId!,
+                              };
+                              return Column(
+                                children: [
+                                  for (final entry in ledger.reversed)
+                                    _LedgerRow(
+                                      entry: entry,
+                                      l10n: l10n,
+                                      // Only an un-reversed payment (credit,
+                                      // not itself a reversal) can be undone —
+                                      // a sale debit is out of scope here, and
+                                      // undoing an already-undone payment
+                                      // would double-count.
+                                      onUndo: entry.entryType == KhataEntryType.credit &&
+                                              !reversedEntryIds.contains(entry.entryId)
+                                          ? () => _undoPayment(entry)
+                                          : null,
+                                    ),
+                                ],
+                              );
+                            }),
                           ),
                       ],
                     ),
@@ -188,17 +239,27 @@ class _CustomerDetailScreenState extends ConsumerState<CustomerDetailScreen> {
 }
 
 class _LedgerRow extends StatelessWidget {
-  const _LedgerRow({required this.entry, required this.l10n});
+  const _LedgerRow({required this.entry, required this.l10n, this.onUndo});
 
   final KhataEntry entry;
   final AppLocalizations l10n;
+
+  /// Non-null only for a still-reversible payment row (see
+  /// [_CustomerDetailScreenState._undoPayment]'s caller for eligibility).
+  final VoidCallback? onUndo;
 
   @override
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorTokens>()!;
     final type = Theme.of(context).extension<AppTypographyTokens>()!;
     final isDebit = entry.entryType == KhataEntryType.debit;
+    final isReversal = entry.reversalOfEntryId != null;
     final dateStr = DateFormat('d MMM, h:mm a').format(entry.timestamp);
+    final label = isReversal
+        ? l10n.ledgerPaymentReversed
+        : isDebit
+            ? l10n.ledgerSaleOnKhata
+            : l10n.ledgerPaymentReceived;
 
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 10),
@@ -218,7 +279,7 @@ class _LedgerRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  isDebit ? l10n.ledgerSaleOnKhata : l10n.ledgerPaymentReceived,
+                  label,
                   style: type.bodyEmphasis.copyWith(color: colors.text),
                 ),
                 const SizedBox(height: 2),
@@ -244,6 +305,12 @@ class _LedgerRow extends StatelessWidget {
               color: isDebit ? colors.alert : colors.success,
             ),
           ),
+          if (onUndo != null)
+            IconButton(
+              icon: Icon(Icons.undo, size: 18, color: colors.textSoft),
+              tooltip: l10n.undoPaymentAction,
+              onPressed: onUndo,
+            ),
         ],
       ),
     );

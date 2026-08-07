@@ -18,6 +18,7 @@ class KhataEntry {
     this.billId,
     this.note,
     this.synced = false,
+    this.reversalOfEntryId,
   });
 
   final String entryId;
@@ -32,6 +33,13 @@ class KhataEntry {
   final DateTime timestamp;
   final bool synced;
 
+  /// Set only on a correction entry — the [entryId] of the (always credit)
+  /// entry this one offsets. A mistaken payment is never updated or
+  /// deleted; it's cancelled out by inserting a new debit entry that points
+  /// back at it, so the ledger and its audit trail stay append-only (see
+  /// [KhataEntriesDao]'s class doc). Null on every ordinary entry.
+  final String? reversalOfEntryId;
+
   Map<String, Object?> toMap() => {
         'entry_id': entryId,
         'customer_id': customerId,
@@ -41,6 +49,7 @@ class KhataEntry {
         'note': note,
         'timestamp': timestamp.millisecondsSinceEpoch,
         'synced': synced ? 1 : 0,
+        'reversal_of_entry_id': reversalOfEntryId,
       };
 
   static KhataEntry fromMap(Map<String, Object?> map) => KhataEntry(
@@ -52,5 +61,6 @@ class KhataEntry {
         note: map['note'] as String?,
         timestamp: DateTime.fromMillisecondsSinceEpoch(map['timestamp']! as int),
         synced: (map['synced']! as int) == 1,
+        reversalOfEntryId: map['reversal_of_entry_id'] as String?,
       );
 }

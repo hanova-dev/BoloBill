@@ -20,14 +20,19 @@ import 'running_bill_screen.dart';
 
 /// Screen B2 — voice line-item capture (SRS §12 pipeline).
 ///
-/// "VAD" here is push-to-talk plus Android SpeechRecognizer's own built-in
-/// endpoint detection (§12.6: "push-to-talk ... is the default interaction,
-/// not always-on listening" — bounding the audio window this way is itself
-/// the noise-reduction strategy) rather than a separate custom on-device VAD
-/// model — §12.9 recommends the built-in recognizer as the v1 baseline
-/// specifically *paired with* the grammar/confidence layers, not a bespoke
-/// signal-processing stack. Layers 3-5 (domain grammar, slot parser,
-/// confidence gate) are the custom logic actually built here, in
+/// "VAD" here is push-to-talk: the retailer holds the mic down for exactly
+/// as long as they're speaking and lets go when done, rather than the app
+/// guessing from silence when they've finished (§12.6: "push-to-talk ... is
+/// the default interaction, not always-on listening" — bounding the audio
+/// window this way is itself the noise-reduction strategy). Real-device
+/// testing in market-noise conditions found the platform's own silence
+/// detection an unreliable way to end a recording — it either cuts someone
+/// off mid-sentence or, if background noise reads as "still talking", keeps
+/// listening well past when they're done. Direct physical control removes
+/// that guess entirely. §12.9 recommends the built-in recognizer as the v1
+/// baseline specifically *paired with* the grammar/confidence layers, not a
+/// bespoke signal-processing stack — layers 3-5 (domain grammar, slot
+/// parser, confidence gate) are the custom logic actually built here, in
 /// `features/voice/`.
 class VoiceListeningScreen extends ConsumerStatefulWidget {
   const VoiceListeningScreen({super.key});
@@ -62,17 +67,29 @@ class _VoiceListeningScreenState extends ConsumerState<VoiceListeningScreen> {
   static const _listenTimeout = Duration(seconds: 15);
   Timer? _listenTimeoutTimer;
 
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _start());
-  }
+  /// Tracks whether the finger is still down — [_start]'s setup (permission
+  /// request, engine init, locale lookup) is async, so a very quick
+  /// press-and-release can finish *before* setup does. Checked right before
+  /// actually calling `.listen()` so a tap-and-immediately-let-go never
+  /// starts listening after the retailer has already lifted their finger,
+  /// which would be a confusing "I let go and it's still recording."
+  bool _pressed = false;
 
   @override
   void dispose() {
     _listenTimeoutTimer?.cancel();
     _speech.stop();
     super.dispose();
+  }
+
+  void _onHoldStart() {
+    _pressed = true;
+    _start();
+  }
+
+  void _onHoldEnd() {
+    _pressed = false;
+    if (_listening) _speech.stop();
   }
 
   Future<void> _start() async {
@@ -150,6 +167,10 @@ class _VoiceListeningScreenState extends ConsumerState<VoiceListeningScreen> {
     }
     final speechLocaleId = matched?.localeId ?? preferredLocaleId;
 
+    // The setup above is async — if the retailer already let go before it
+    // finished, don't start listening into what's now an unheld button.
+    if (!_pressed) return;
+
     setState(() {
       _listening = true;
       _transcript = '';
@@ -157,10 +178,12 @@ class _VoiceListeningScreenState extends ConsumerState<VoiceListeningScreen> {
     });
     _listenTimeoutTimer?.cancel();
     _listenTimeoutTimer = Timer(_listenTimeout, () {
-      // Belt-and-suspenders: stop() *should* fire onStatus itself, but the
-      // failure mode this guards against is exactly the platform side
-      // going silent, so _onCaptureFinished is also called directly rather
-      // than trusting that callback to arrive.
+      // Caps how long a single hold can run (nobody needs to hold the mic
+      // for a whole billing line) and doubles as a hang safety net:
+      // stop() *should* fire onStatus itself, but the failure mode this
+      // guards against is exactly the platform side going silent, so
+      // _onCaptureFinished is also called directly rather than trusting
+      // that callback to arrive.
       _speech.stop();
       _onCaptureFinished();
     });
@@ -228,10 +251,15 @@ class _VoiceListeningScreenState extends ConsumerState<VoiceListeningScreen> {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                FabMic(onTap: _start, size: 96, listening: _listening),
+                FabMic(
+                  onHoldStart: _onHoldStart,
+                  onHoldEnd: _onHoldEnd,
+                  size: 96,
+                  listening: _listening,
+                ),
                 const SizedBox(height: 22),
                 Text(
-                  _listening ? l10n.listeningEllipsis : l10n.tapMicToRetry,
+                  _listening ? l10n.listeningEllipsis : l10n.holdMicToSpeak,
                   style: type.eyebrow.copyWith(color: colors.textSoft),
                   textAlign: TextAlign.center,
                 ),

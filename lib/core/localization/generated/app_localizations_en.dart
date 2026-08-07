@@ -232,7 +232,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get listeningEllipsis => 'Listening…';
 
   @override
-  String get tapMicToRetry => 'Tap the mic to speak again';
+  String get holdMicToSpeak => 'Hold the mic and speak';
 
   @override
   String get billTotalLabel => 'BILL TOTAL';
@@ -335,6 +335,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get ledgerPaymentReceived => 'Payment Received';
 
   @override
+  String get ledgerPaymentReversed => 'Payment Reversed';
+
+  @override
   String get recordPaymentButton => 'Record Payment';
 
   @override
@@ -344,6 +347,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String paymentFromLabel(String name) {
     return 'Payment from $name';
   }
+
+  @override
+  String get undoPaymentAction => 'Undo Payment';
+
+  @override
+  String get undoPaymentConfirmTitle => 'Undo this payment?';
+
+  @override
+  String undoPaymentConfirmBody(String amount) {
+    return 'This reverses the $amount payment and adds it back to the balance. This can\'t be undone.';
+  }
+
+  @override
+  String get undoPaymentConfirmButton => 'Undo Payment';
+
+  @override
+  String get cancelLabel => 'Cancel';
+
+  @override
+  String get paymentUndoneToast => 'Payment undone';
 
   @override
   String get receiptTitle => 'Receipt';

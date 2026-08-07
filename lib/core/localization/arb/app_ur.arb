@@ -87,7 +87,7 @@
 
   "noisyPrompt": "صاف سنائی نہیں دیا — دوبارہ کوشش کریں",
   "listeningEllipsis": "سن رہا ہے…",
-  "tapMicToRetry": "دوبارہ بولنے کے لیے مائیک دبائیں",
+  "holdMicToSpeak": "مائیک دبائے رکھیں اور بولیں",
 
   "billTotalLabel": "کل رقم",
   "listenAgain": "دوبارہ سنیں",
@@ -131,12 +131,23 @@
   "noLedgerEntriesYet": "اس گاہک کے لیے ابھی کوئی لین دین نہیں",
   "ledgerSaleOnKhata": "کھاتے پر فروخت",
   "ledgerPaymentReceived": "ادائیگی موصول ہوئی",
+  "ledgerPaymentReversed": "ادائیگی واپس لے لی گئی",
   "recordPaymentButton": "ادائیگی درج کریں",
   "recordPaymentTitle": "ادائیگی درج کریں",
   "paymentFromLabel": "{name} کی ادائیگی",
   "@paymentFromLabel": {
     "placeholders": { "name": { "type": "String" } }
   },
+
+  "undoPaymentAction": "ادائیگی واپس لیں",
+  "undoPaymentConfirmTitle": "کیا یہ ادائیگی واپس لینی ہے؟",
+  "undoPaymentConfirmBody": "اس سے {amount} کی ادائیگی واپس ہو جائے گی اور بقایا میں دوبارہ شامل ہو جائے گی۔ یہ واپس نہیں ہو سکتا۔",
+  "@undoPaymentConfirmBody": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "undoPaymentConfirmButton": "ادائیگی واپس لیں",
+  "cancelLabel": "منسوخ کریں",
+  "paymentUndoneToast": "ادائیگی واپس لے لی گئی",
 
   "receiptTitle": "رسید",
   "shareViaWhatsApp": "واٹس ایپ پر بھیجیں",

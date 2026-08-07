@@ -230,7 +230,7 @@ class AppLocalizationsUr extends AppLocalizations {
   String get listeningEllipsis => 'سن رہا ہے…';
 
   @override
-  String get tapMicToRetry => 'دوبارہ بولنے کے لیے مائیک دبائیں';
+  String get holdMicToSpeak => 'مائیک دبائے رکھیں اور بولیں';
 
   @override
   String get billTotalLabel => 'کل رقم';
@@ -334,6 +334,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get ledgerPaymentReceived => 'ادائیگی موصول ہوئی';
 
   @override
+  String get ledgerPaymentReversed => 'ادائیگی واپس لے لی گئی';
+
+  @override
   String get recordPaymentButton => 'ادائیگی درج کریں';
 
   @override
@@ -343,6 +346,26 @@ class AppLocalizationsUr extends AppLocalizations {
   String paymentFromLabel(String name) {
     return '$name کی ادائیگی';
   }
+
+  @override
+  String get undoPaymentAction => 'ادائیگی واپس لیں';
+
+  @override
+  String get undoPaymentConfirmTitle => 'کیا یہ ادائیگی واپس لینی ہے؟';
+
+  @override
+  String undoPaymentConfirmBody(String amount) {
+    return 'اس سے $amount کی ادائیگی واپس ہو جائے گی اور بقایا میں دوبارہ شامل ہو جائے گی۔ یہ واپس نہیں ہو سکتا۔';
+  }
+
+  @override
+  String get undoPaymentConfirmButton => 'ادائیگی واپس لیں';
+
+  @override
+  String get cancelLabel => 'منسوخ کریں';
+
+  @override
+  String get paymentUndoneToast => 'ادائیگی واپس لے لی گئی';
 
   @override
   String get receiptTitle => 'رسید';
@@ -686,7 +709,7 @@ class AppLocalizationsUrLatn extends AppLocalizationsUr {
   String get listeningEllipsis => 'Sun raha hai…';
 
   @override
-  String get tapMicToRetry => 'Dobara bolne ke liye mic dabayein';
+  String get holdMicToSpeak => 'Mic dabaye rakhein aur bolein';
 
   @override
   String get billTotalLabel => 'Kul Raqam';
@@ -790,6 +813,9 @@ class AppLocalizationsUrLatn extends AppLocalizationsUr {
   String get ledgerPaymentReceived => 'Payment Mil Gayi';
 
   @override
+  String get ledgerPaymentReversed => 'Payment Wapas Le Li Gayi';
+
+  @override
   String get recordPaymentButton => 'Payment Darj Karein';
 
   @override
@@ -799,6 +825,26 @@ class AppLocalizationsUrLatn extends AppLocalizationsUr {
   String paymentFromLabel(String name) {
     return '$name Ki Payment';
   }
+
+  @override
+  String get undoPaymentAction => 'Payment Wapas Lein';
+
+  @override
+  String get undoPaymentConfirmTitle => 'Kya yeh payment wapas leni hai?';
+
+  @override
+  String undoPaymentConfirmBody(String amount) {
+    return 'Is se $amount ki payment wapas ho jayegi aur baqaya mein dobara shamil ho jayegi. Yeh wapas nahi ho sakta.';
+  }
+
+  @override
+  String get undoPaymentConfirmButton => 'Payment Wapas Lein';
+
+  @override
+  String get cancelLabel => 'Cancel Karein';
+
+  @override
+  String get paymentUndoneToast => 'Payment wapas le li gayi';
 
   @override
   String get receiptTitle => 'Receipt';

@@ -8,12 +8,33 @@ import '../core/theme/app_color_tokens.dart';
 class FabMic extends StatefulWidget {
   const FabMic({
     super.key,
-    required this.onTap,
+    this.onTap,
+    this.onHoldStart,
+    this.onHoldEnd,
     this.size = 78,
     this.listening = false,
-  });
+  }) : assert(
+          (onTap == null) != (onHoldStart == null),
+          'Pass onTap (a single tap does something, e.g. navigate) or both '
+          'onHoldStart/onHoldEnd (press-and-hold to record) — not both '
+          'modes, not neither.',
+        );
 
-  final VoidCallback onTap;
+  /// Single-tap mode — B1's mic just opens the voice-entry screen, where
+  /// tapping and holding are the same gesture arena, so a plain tap is
+  /// correct there. Mutually exclusive with [onHoldStart]/[onHoldEnd].
+  final VoidCallback? onTap;
+
+  /// Press-and-hold mode: fires on finger-down and on finger-up/cancel.
+  /// Used by the actual voice-capture screens (B2, A4) so the retailer
+  /// directly controls when recording starts and stops — like a walkie-
+  /// talkie button — rather than the app guessing when they've stopped
+  /// talking from silence, which on-device testing found unreliable in a
+  /// noisy market (and which either cuts someone off mid-sentence or, if
+  /// the guess is too generous, keeps listening long after they're done).
+  final VoidCallback? onHoldStart;
+  final VoidCallback? onHoldEnd;
+
   final double size;
 
   /// Whether the mic is actively capturing — drives the pulsing rings.
@@ -64,6 +85,26 @@ class _FabMicState extends State<FabMic> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorTokens>()!;
 
+    final button = Container(
+      width: widget.size,
+      height: widget.size,
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        gradient: RadialGradient(
+          center: const Alignment(-0.3, -0.4),
+          colors: [colors.accentGradientEnd, colors.accent],
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: colors.accent.withValues(alpha: 0.45),
+            blurRadius: 24,
+            offset: const Offset(0, 12),
+          ),
+        ],
+      ),
+      child: Icon(Icons.mic, color: Colors.white, size: widget.size * 0.38),
+    );
+
     return SizedBox(
       width: widget.size * 2,
       height: widget.size * 2,
@@ -75,33 +116,23 @@ class _FabMicState extends State<FabMic> with SingleTickerProviderStateMixin {
             _Ring(controller: _controller, delay: 0.33, baseSize: widget.size, color: colors.accent),
             _Ring(controller: _controller, delay: 0.66, baseSize: widget.size, color: colors.accent),
           ],
-          Material(
-            color: Colors.transparent,
-            shape: const CircleBorder(),
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: widget.onTap,
-              child: Container(
-                width: widget.size,
-                height: widget.size,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: RadialGradient(
-                    center: const Alignment(-0.3, -0.4),
-                    colors: [colors.accentGradientEnd, colors.accent],
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: colors.accent.withValues(alpha: 0.45),
-                      blurRadius: 24,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
-                ),
-                child: Icon(Icons.mic, color: Colors.white, size: widget.size * 0.38),
+          if (widget.onHoldStart != null)
+            GestureDetector(
+              onTapDown: (_) => widget.onHoldStart!(),
+              onTapUp: (_) => widget.onHoldEnd!(),
+              onTapCancel: widget.onHoldEnd,
+              child: button,
+            )
+          else
+            Material(
+              color: Colors.transparent,
+              shape: const CircleBorder(),
+              child: InkWell(
+                customBorder: const CircleBorder(),
+                onTap: widget.onTap,
+                child: button,
               ),
             ),
-          ),
         ],
       ),
     );

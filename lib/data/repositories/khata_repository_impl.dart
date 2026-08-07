@@ -72,6 +72,26 @@ class KhataRepositoryImpl implements KhataRepository {
     });
   }
 
+  @override
+  Future<void> reversePayment({
+    required String customerId,
+    required KhataEntry originalCreditEntry,
+  }) async {
+    await _db.transaction((txn) async {
+      final entriesDao = KhataEntriesDao(txn);
+      await entriesDao.insertEntry(KhataEntry(
+        entryId: IdGenerator.newId(),
+        customerId: customerId,
+        entryType: KhataEntryType.debit,
+        amount: originalCreditEntry.amount,
+        note: 'Payment correction',
+        timestamp: DateTime.now(),
+        reversalOfEntryId: originalCreditEntry.entryId,
+      ));
+      await _refreshCachedBalance(txn, customerId);
+    });
+  }
+
   Future<void> _refreshCachedBalance(DatabaseExecutor txn, String customerId) async {
     final summary = await KhataEntriesDao(txn).summarizeForCustomer(customerId);
     await CustomersDao(txn).updateCachedBalance(

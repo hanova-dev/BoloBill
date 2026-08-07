@@ -35,6 +35,13 @@ class AppDatabase {
           await db.execute(statement);
         }
       },
+      onUpgrade: (db, oldVersion, newVersion) async {
+        if (oldVersion < 2) {
+          for (final statement in kMigrationV1ToV2) {
+            await db.execute(statement);
+          }
+        }
+      },
     );
     return AppDatabase._(db);
   }

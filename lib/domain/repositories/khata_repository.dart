@@ -34,6 +34,20 @@ abstract interface class KhataRepository {
 
   Future<List<Payment>> getPayments(String customerId);
 
+  /// Corrects a mistakenly recorded payment (SRS §9.1-adjacent, requested
+  /// post-launch: shopkeepers do fat-finger amounts). The ledger is
+  /// append-only, so this never touches [originalCreditEntry] — it inserts
+  /// a new debit entry for the same amount, linked back via
+  /// [KhataEntry.reversalOfEntryId], which cancels the payment's effect
+  /// through the same live SUM aggregate every other balance read uses.
+  /// [originalCreditEntry] must be a credit entry that hasn't already been
+  /// reversed — the caller (C3) is responsible for only offering this on
+  /// eligible rows.
+  Future<void> reversePayment({
+    required String customerId,
+    required KhataEntry originalCreditEntry,
+  });
+
   /// The authoritative balance — always SUM(khata_entries), never a stored
   /// value trusted on its own (FR-3.4.8).
   Future<Money> getBalance(String customerId);

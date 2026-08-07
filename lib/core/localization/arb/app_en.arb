@@ -93,7 +93,7 @@
 
   "noisyPrompt": "Couldn't hear that clearly — please try again",
   "listeningEllipsis": "Listening…",
-  "tapMicToRetry": "Tap the mic to speak again",
+  "holdMicToSpeak": "Hold the mic and speak",
 
   "billTotalLabel": "BILL TOTAL",
   "listenAgain": "Listen Again",
@@ -137,12 +137,23 @@
   "noLedgerEntriesYet": "No transactions yet for this customer",
   "ledgerSaleOnKhata": "Sale on Khata",
   "ledgerPaymentReceived": "Payment Received",
+  "ledgerPaymentReversed": "Payment Reversed",
   "recordPaymentButton": "Record Payment",
   "recordPaymentTitle": "Record Payment",
   "paymentFromLabel": "Payment from {name}",
   "@paymentFromLabel": {
     "placeholders": { "name": { "type": "String" } }
   },
+
+  "undoPaymentAction": "Undo Payment",
+  "undoPaymentConfirmTitle": "Undo this payment?",
+  "undoPaymentConfirmBody": "This reverses the {amount} payment and adds it back to the balance. This can't be undone.",
+  "@undoPaymentConfirmBody": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "undoPaymentConfirmButton": "Undo Payment",
+  "cancelLabel": "Cancel",
+  "paymentUndoneToast": "Payment undone",
 
   "receiptTitle": "Receipt",
   "shareViaWhatsApp": "Share via WhatsApp",

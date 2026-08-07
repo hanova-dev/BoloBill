@@ -87,7 +87,7 @@
 
   "noisyPrompt": "Saaf sunai nahi diya — dobara koshish karein",
   "listeningEllipsis": "Sun raha hai…",
-  "tapMicToRetry": "Dobara bolne ke liye mic dabayein",
+  "holdMicToSpeak": "Mic dabaye rakhein aur bolein",
 
   "billTotalLabel": "Kul Raqam",
   "listenAgain": "Dobara Sunein",
@@ -131,12 +131,23 @@
   "noLedgerEntriesYet": "Is grahak ke liye abhi koi len den nahi",
   "ledgerSaleOnKhata": "Khaty Par Farokht",
   "ledgerPaymentReceived": "Payment Mil Gayi",
+  "ledgerPaymentReversed": "Payment Wapas Le Li Gayi",
   "recordPaymentButton": "Payment Darj Karein",
   "recordPaymentTitle": "Payment Darj Karein",
   "paymentFromLabel": "{name} Ki Payment",
   "@paymentFromLabel": {
     "placeholders": { "name": { "type": "String" } }
   },
+
+  "undoPaymentAction": "Payment Wapas Lein",
+  "undoPaymentConfirmTitle": "Kya yeh payment wapas leni hai?",
+  "undoPaymentConfirmBody": "Is se {amount} ki payment wapas ho jayegi aur baqaya mein dobara shamil ho jayegi. Yeh wapas nahi ho sakta.",
+  "@undoPaymentConfirmBody": {
+    "placeholders": { "amount": { "type": "String" } }
+  },
+  "undoPaymentConfirmButton": "Payment Wapas Lein",
+  "cancelLabel": "Cancel Karein",
+  "paymentUndoneToast": "Payment wapas le li gayi",
 
   "receiptTitle": "Receipt",
   "shareViaWhatsApp": "WhatsApp Par Bhejein",

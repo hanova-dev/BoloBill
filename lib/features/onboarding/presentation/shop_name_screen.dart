@@ -49,6 +49,12 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
   static const _listenTimeout = Duration(seconds: 15);
   Timer? _listenTimeoutTimer;
 
+  /// See [VoiceListeningScreen._pressed] — press-and-hold setup is async,
+  /// so a very quick press-and-release can finish *after* the finger's
+  /// already up; checked right before `.listen()` so that race never starts
+  /// listening into an unheld button.
+  bool _pressed = false;
+
   @override
   void dispose() {
     _listenTimeoutTimer?.cancel();
@@ -57,7 +63,17 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
     super.dispose();
   }
 
-  Future<void> _onMicTap() async {
+  void _onHoldStart() {
+    _pressed = true;
+    _start();
+  }
+
+  void _onHoldEnd() {
+    _pressed = false;
+    if (_listening) _speech.stop();
+  }
+
+  Future<void> _start() async {
     setState(() => _micError = null);
     final l10n = AppLocalizations.of(context);
 
@@ -133,6 +149,8 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
     }
     final speechLocaleId = matched?.localeId ?? preferredLocaleId;
 
+    if (!_pressed) return;
+
     setState(() => _listening = true);
     _listenTimeoutTimer?.cancel();
     _listenTimeoutTimer = Timer(_listenTimeout, () {
@@ -183,13 +201,21 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
           child: Column(
             children: [
               const Spacer(),
-              FabMic(onTap: _onMicTap, listening: _listening),
+              FabMic(onHoldStart: _onHoldStart, onHoldEnd: _onHoldEnd, listening: _listening),
               const SizedBox(height: 22),
               Text(
-                l10n.sayYourShopName,
+                _listening ? l10n.listeningEllipsis : l10n.sayYourShopName,
                 style: type.eyebrow.copyWith(color: colors.textSoft),
                 textAlign: TextAlign.center,
               ),
+              if (!_listening) ...[
+                const SizedBox(height: 4),
+                Text(
+                  l10n.holdMicToSpeak,
+                  style: type.caption.copyWith(color: colors.textSoft),
+                  textAlign: TextAlign.center,
+                ),
+              ],
               const SizedBox(height: 14),
               TextField(
                 controller: _nameController,
