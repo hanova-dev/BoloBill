@@ -12,12 +12,10 @@ rules_version = '2';
 // synced yet, only the owner's own device). Every read/write anywhere under
 // a shop's subtree requires being signed in as that shop's owner.
 //
-// NOTE FOR DEPLOYMENT: this file is source-controlled but has NOT been
-// deployed — deploy from an account with access to the `bolo-bill` Firebase
-// project via `firebase deploy --only firestore:rules` (or paste into the
-// Firebase Console's Rules editor) before relying on real sync in
-// production. Until deployed, Firestore's default rules apply, which deny
-// all client access — sync calls will fail with permission-denied.
+// Deployed to the `bolo-bill` Firebase project's Firestore Rules editor
+// (confirmed 2026-08-04) — keep this file and the Console copy in sync by
+// hand for now (no CI step deploys it automatically); re-paste here after
+// any Console-side edit, and vice versa after editing this file.
 service cloud.firestore {
   match /databases/{database}/documents {
 
