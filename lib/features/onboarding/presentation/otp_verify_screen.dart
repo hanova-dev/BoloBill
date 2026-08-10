@@ -7,6 +7,7 @@ import '../../../core/theme/app_color_tokens.dart';
 import '../../../core/theme/app_radii.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared_widgets/numeric_keypad.dart';
+import '../../billing/presentation/billing_home_screen.dart';
 import '../application/onboarding_controller.dart';
 import 'business_type_screen.dart';
 
@@ -57,7 +58,21 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
           .read(authRepositoryProvider)
           .verifyOtp(verificationId: verificationId, smsCode: _code);
       if (!mounted) return;
-      ref.read(onboardingControllerProvider.notifier).setAuthResult(result);
+      final controller = ref.read(onboardingControllerProvider.notifier);
+      controller.setAuthResult(result);
+
+      // This phone number may already own a shop from a previous install —
+      // check before running through onboarding-from-scratch again.
+      final restored = await controller.tryRestoreFromCloud();
+      if (!mounted) return;
+      if (restored != null) {
+        await Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const BillingHomeScreen()),
+          (route) => false,
+        );
+        return;
+      }
+
       await Navigator.of(context).pushReplacement(
         MaterialPageRoute(builder: (_) => const BusinessTypeScreen()),
       );

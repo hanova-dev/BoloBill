@@ -12,19 +12,21 @@ import '../../../shared_widgets/numeric_keypad.dart';
 import '../../voice/slot_parser/parsed_line_item.dart';
 import '../application/billing_controller.dart';
 import '../application/draft_line_item.dart';
-import 'running_bill_screen.dart';
 
 enum _ActiveField { quantity, price }
 
 /// Screen B4 — manual entry with a fraction-aware numeric keypad
-/// (FR-3.2.4/3.2.5/3.2.6). Reached three ways: from B1 (first item), from
-/// B3 (subsequent items), or from B2 when the confidence gate (SRS §12.5)
-/// flags a voice-parsed line as needing a one-tap confirmation — [prefill]
-/// pre-populates the same fields in that case, doubling this screen as the
-/// gate's review UI rather than duplicating field-editing code. Whichever
-/// field(s) triggered the low-confidence flag get a visible warning border,
-/// so voice and manual stay genuinely equal-status: correcting a misheard
-/// entry is just editing a normal form, not a separate "fix voice" flow.
+/// (FR-3.2.4/3.2.5/3.2.6). Reached two ways: from B1 (first item, no bill
+/// screen underneath yet), or pushed on top of the bill-in-progress screen
+/// (RunningBillScreen — either the retailer tapped "Manual" there directly,
+/// or a voice capture tripped the confidence gate (SRS §12.5) and needs a
+/// one-tap confirmation, in which case [prefill] pre-populates the same
+/// fields). Whichever field(s) triggered a low-confidence flag get a
+/// visible warning border, so voice and manual stay genuinely equal-status:
+/// correcting a misheard entry is just editing a normal form, not a
+/// separate "fix voice" flow. Always just pops with `true` on success —
+/// see [_addToBill] — since only the caller knows whether it needs to
+/// create the bill screen or is already showing it underneath.
 class ManualEntryScreen extends ConsumerStatefulWidget {
   const ManualEntryScreen({super.key, this.prefill});
 
@@ -131,9 +133,12 @@ class _ManualEntryScreenState extends ConsumerState<ManualEntryScreen> {
           unit: _unit,
           pricePerUnit: Money.fromRupees(price),
         ));
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(builder: (_) => const RunningBillScreen()),
-    );
+    // Always just pops with a result — this screen no longer decides where
+    // to go next. B1 (no bill screen underneath yet) and the bill-in-
+    // progress screen (already underneath, already watching the same
+    // billingControllerProvider state) need different follow-ups, and only
+    // the caller knows which situation it's in.
+    Navigator.of(context).pop(true);
   }
 
   @override

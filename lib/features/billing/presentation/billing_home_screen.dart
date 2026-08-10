@@ -15,13 +15,26 @@ import '../../notifications/presentation/in_app_toast.dart';
 import '../../reports/presentation/reports_screen.dart';
 import '../../settings/presentation/settings_screen.dart';
 import 'manual_entry_screen.dart';
-import 'voice_listening_screen.dart';
+import 'running_bill_screen.dart';
 
-/// Screen B1 — the billing home / empty-bill state. Once the first line
-/// item exists (voice or manual), B2/B4 replace this with B3 (the running
-/// list) — B1 itself is only ever the pre-first-item entry point.
+/// Screen B1 — the billing home / empty-bill state. Tapping the mic or
+/// "Enter Manually" moves to the bill-in-progress screen (voice capture and
+/// the running list live on that one screen together — see
+/// RunningBillScreen's doc comment) — B1 itself is only ever the
+/// pre-first-item entry point.
 class BillingHomeScreen extends ConsumerWidget {
   const BillingHomeScreen({super.key});
+
+  Future<void> _enterManually(BuildContext context) async {
+    final added = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(builder: (_) => const ManualEntryScreen()),
+    );
+    if (added == true && context.mounted) {
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (_) => const RunningBillScreen()),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -136,17 +149,13 @@ class BillingHomeScreen extends ConsumerWidget {
                   FabMic(
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => const VoiceListeningScreen(),
+                        builder: (_) => const RunningBillScreen(),
                       ),
                     ),
                   ),
                   const SizedBox(height: 16),
                   OutlinedButton.icon(
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (_) => const ManualEntryScreen(),
-                      ),
-                    ),
+                    onPressed: () => _enterManually(context),
                     icon: const Icon(Icons.keyboard),
                     label: Text(l10n.enterManually),
                   ),

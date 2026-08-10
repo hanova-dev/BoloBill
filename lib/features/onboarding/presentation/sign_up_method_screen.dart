@@ -7,6 +7,7 @@ import '../../../core/theme/app_color_tokens.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../domain/repositories/auth_repository.dart';
 import '../../../shared_widgets/google_sign_in_button.dart';
+import '../../billing/presentation/billing_home_screen.dart';
 import '../application/onboarding_controller.dart';
 import 'phone_number_screen.dart';
 
@@ -37,6 +38,19 @@ class _SignUpMethodScreenState extends ConsumerState<SignUpMethodScreen> {
       final controller = ref.read(onboardingControllerProvider.notifier);
       controller.setSignInMethod(SignInMethod.google);
       controller.setAuthResult(result);
+
+      // This Google account may already own a shop from a previous install
+      // — check before running through onboarding-from-scratch again.
+      final restored = await controller.tryRestoreFromCloud();
+      if (!mounted) return;
+      if (restored != null) {
+        await Navigator.of(context).pushAndRemoveUntil(
+          MaterialPageRoute(builder: (_) => const BillingHomeScreen()),
+          (route) => false,
+        );
+        return;
+      }
+
       await Navigator.of(context).push(
         MaterialPageRoute(builder: (_) => const PhoneNumberScreen(mode: PhoneEntryMode.plainCapture)),
       );

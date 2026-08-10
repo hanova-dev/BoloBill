@@ -14,6 +14,18 @@ abstract interface class ShopRepository {
   /// straight into billing.
   Future<Shop?> getLocalShop();
 
+  /// Looks up an existing shop in Firestore by the signed-in Firebase uid
+  /// that owns it, and — if found — inserts it locally and returns it. Used
+  /// right after a fresh sign-in (Google or phone) on a device with no
+  /// local shop yet, so a reinstall or new device recognizes an existing
+  /// account and skips onboarding-from-scratch instead of silently creating
+  /// a second, disconnected shop for the same person. Requires the
+  /// Firestore security rules to actually be deployed (see firestore.rules)
+  /// — until then this always effectively returns null (permission-denied
+  /// is treated as "nothing found", not an error, so a fresh sign-up still
+  /// works normally).
+  Future<Shop?> restoreFromCloud(String ownerUid);
+
   /// FR-3.6.1: changeable at any time from settings.
   Future<void> updatePreferredLanguage(String shopId, AppLocale language);
 }

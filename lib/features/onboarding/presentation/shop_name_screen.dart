@@ -41,27 +41,28 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
   String? _micError;
   bool _completing = false;
 
-  /// Same safety net as [VoiceListeningScreen] (B2) — on-device testing
-  /// found the platform recognizer can start listening and then never fire
-  /// any callback at all, leaving the mic stuck "listening" forever with no
-  /// way out. A4 never had this guard even though it shares the exact same
-  /// underlying `speech_to_text` call.
+  /// Same safety net as the bill-in-progress screen's voice capture
+  /// (RunningBillScreen) — on-device testing found the platform recognizer
+  /// can start listening and then never fire any callback at all, leaving
+  /// the mic stuck "listening" forever with no way out. A4 never had this
+  /// guard even though it shares the exact same underlying `speech_to_text`
+  /// call.
   static const _listenTimeout = Duration(seconds: 15);
   Timer? _listenTimeoutTimer;
 
-  /// See [VoiceListeningScreen._pressed] — press-and-hold setup is async,
+  /// See [RunningBillScreen]'s `_pressed` — press-and-hold setup is async,
   /// so a very quick press-and-release can finish *after* the finger's
   /// already up; checked right before `.listen()` so that race never starts
   /// listening into an unheld button.
   bool _pressed = false;
 
-  /// See [VoiceListeningScreen._speechSetup] — pre-warmed in [initState]
+  /// See [RunningBillScreen]'s `_speechSetup` — pre-warmed in [initState]
   /// rather than lazily on first press, since engine init alone measured
   /// multiple seconds on real hardware and used to sit entirely between the
   /// retailer's touch and any visible response.
   late Future<String?> _speechSetup;
 
-  /// See [VoiceListeningScreen._startToken] — guards against overlapping
+  /// See [RunningBillScreen]'s `_startToken` — guards against overlapping
   /// `_start` calls from rapid repeated taps during that dead window.
   int _startToken = 0;
 
@@ -86,7 +87,7 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
       // user-facing text — showing them raw to a low-literacy retailer
       // defeats the point of a voice-first app. Every error, from the
       // engine or from the timeout below, collapses to the same one
-      // friendly retry prompt already used on B2.
+      // friendly retry prompt already used on the bill-in-progress screen.
       onError: (error) {
         if (!mounted) return;
         _listenTimeoutTimer?.cancel();
@@ -114,11 +115,12 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
       AppLocale.romanUrdu || AppLocale.english => 'en',
     };
 
-    // Same language-family matching as B2's voice pipeline — real devices
-    // routinely report a regional variant (en_GB, en_IN, en_PK, ...) rather
-    // than the literal en_US/ur_PK, and locales() itself is sometimes empty
-    // even on a device where recognition works fine. See
-    // VoiceListeningScreen._prepareSpeechEngine for the full reasoning.
+    // Same language-family matching as the bill-in-progress screen's voice
+    // pipeline — real devices routinely report a regional variant (en_GB,
+    // en_IN, en_PK, ...) rather than the literal en_US/ur_PK, and locales()
+    // itself is sometimes empty even on a device where recognition works
+    // fine. See RunningBillScreen's `_prepareSpeechEngine` for the full
+    // reasoning.
     final available = await _speech.locales();
     stt.LocaleName? matched;
     for (final l in available) {

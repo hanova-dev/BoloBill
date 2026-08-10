@@ -7,6 +7,7 @@ import '../../../core/theme/app_color_tokens.dart';
 import '../../../core/theme/app_radii.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../shared_widgets/numeric_keypad.dart';
+import '../../billing/presentation/billing_home_screen.dart';
 import '../application/onboarding_controller.dart';
 import 'business_type_screen.dart';
 import 'otp_verify_screen.dart';
@@ -68,9 +69,18 @@ class _PhoneNumberScreenState extends ConsumerState<PhoneNumberScreen> {
           .read(authRepositoryProvider)
           .sendOtp(
             phoneNumber: _e164,
-            onAutoVerified: (result) {
+            onAutoVerified: (result) async {
               if (!mounted) return;
               controller.setAuthResult(result);
+              final restored = await controller.tryRestoreFromCloud();
+              if (!mounted) return;
+              if (restored != null) {
+                await Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(builder: (_) => const BillingHomeScreen()),
+                  (route) => false,
+                );
+                return;
+              }
               Navigator.of(context).push(
                 MaterialPageRoute(builder: (_) => const BusinessTypeScreen()),
               );
