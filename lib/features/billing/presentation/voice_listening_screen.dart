@@ -67,13 +67,38 @@ class _VoiceListeningScreenState extends ConsumerState<VoiceListeningScreen> {
   static const _listenTimeout = Duration(seconds: 15);
   Timer? _listenTimeoutTimer;
 
-  /// Tracks whether the finger is still down — [_start]'s setup (permission
-  /// request, engine init, locale lookup) is async, so a very quick
-  /// press-and-release can finish *before* setup does. Checked right before
+  /// Tracks whether the finger is still down — [_start]'s remaining setup
+  /// (mainly the permission check; engine init and locale lookup are
+  /// pre-warmed, see [_speechSetup]) is still async, so a very quick
+  /// press-and-release can finish *before* it does. Checked right before
   /// actually calling `.listen()` so a tap-and-immediately-let-go never
   /// starts listening after the retailer has already lifted their finger,
   /// which would be a confusing "I let go and it's still recording."
   bool _pressed = false;
+
+  /// Kicked off in [initState], not lazily on first press — real-device
+  /// testing measured `speech_to_text.initialize()` alone (it binds to the
+  /// platform recognizer service) taking multiple seconds, and that whole
+  /// chain used to sit between the retailer's touch and the button showing
+  /// anything at all. Pre-warming it here means a later press only ever
+  /// waits on the permission check (near-instant once granted) before
+  /// `.listen()` actually starts.
+  late Future<String?> _speechSetup;
+
+  /// Bumped on every press; each in-flight [_start] captures its own copy
+  /// and checks it against this before touching shared state or calling
+  /// `.listen()`. Repeated rapid taps during the old dead-feedback window
+  /// could otherwise spawn several overlapping `_start` calls — each
+  /// re-running the same async setup, stacking up latency and occasionally
+  /// letting a stale attempt fire `.listen()` after the finger was already
+  /// off the button. A superseded attempt now just quietly bails out.
+  int _startToken = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _speechSetup = _prepareSpeechEngine();
+  }
 
   @override
   void dispose() {
@@ -82,46 +107,28 @@ class _VoiceListeningScreenState extends ConsumerState<VoiceListeningScreen> {
     super.dispose();
   }
 
-  void _onHoldStart() {
-    _pressed = true;
-    _start();
-  }
-
-  void _onHoldEnd() {
-    _pressed = false;
-    if (_listening) _speech.stop();
-  }
-
-  Future<void> _start() async {
-    setState(() => _errorMessage = null);
-    final l10n = AppLocalizations.of(context);
-
-    final status = await Permission.microphone.request();
-    if (!status.isGranted) {
-      setState(() => _errorMessage = l10n.micPermissionDenied);
-      return;
-    }
-
-    if (!_speechAvailable) {
-      _speechAvailable = await _speech.initialize(
-        onError: (error) {
-          if (!mounted) return;
-          setState(() {
-            _errorMessage = l10n.noisyPrompt;
-            _listening = false;
-          });
-        },
-        onStatus: (status) {
-          if (status == 'done' || status == 'notListening') {
-            _onCaptureFinished();
-          }
-        },
-      );
-    }
-    if (!_speechAvailable) {
-      if (mounted) setState(() => _errorMessage = l10n.micUnavailable);
-      return;
-    }
+  /// Engine init + locale resolution only — no permission check (that has
+  /// to happen live, right before recording, since it can change at any
+  /// time) and no `l10n`/`context` use (this runs from [initState], before
+  /// the first frame). Returns the resolved locale id to pass to
+  /// `.listen()`, or null if voice isn't usable at all — [_start] turns
+  /// that into the one existing "mic unavailable" message, same as before.
+  Future<String?> _prepareSpeechEngine() async {
+    _speechAvailable = await _speech.initialize(
+      onError: (error) {
+        if (!mounted) return;
+        setState(() {
+          _errorMessage = AppLocalizations.of(context).noisyPrompt;
+          _listening = false;
+        });
+      },
+      onStatus: (status) {
+        if (status == 'done' || status == 'notListening') {
+          _onCaptureFinished();
+        }
+      },
+    );
+    if (!_speechAvailable) return null;
 
     final locale = ref.read(localeProvider);
     final preferredLocaleId = switch (locale) {
@@ -161,14 +168,41 @@ class _VoiceListeningScreenState extends ConsumerState<VoiceListeningScreen> {
         }
       }
     }
-    if (available.isNotEmpty && matched == null) {
+    if (available.isNotEmpty && matched == null) return null;
+    return matched?.localeId ?? preferredLocaleId;
+  }
+
+  void _onHoldStart() {
+    _pressed = true;
+    _start(++_startToken);
+  }
+
+  void _onHoldEnd() {
+    _pressed = false;
+    if (_listening) _speech.stop();
+  }
+
+  Future<void> _start(int token) async {
+    setState(() => _errorMessage = null);
+    final l10n = AppLocalizations.of(context);
+
+    final status = await Permission.microphone.request();
+    if (token != _startToken) return;
+    if (!status.isGranted) {
+      setState(() => _errorMessage = l10n.micPermissionDenied);
+      return;
+    }
+
+    final speechLocaleId = await _speechSetup;
+    if (token != _startToken) return;
+    if (speechLocaleId == null) {
       if (mounted) setState(() => _errorMessage = l10n.micUnavailable);
       return;
     }
-    final speechLocaleId = matched?.localeId ?? preferredLocaleId;
 
-    // The setup above is async — if the retailer already let go before it
-    // finished, don't start listening into what's now an unheld button.
+    // The permission check above is async — if the retailer already let go
+    // before it finished, don't start listening into what's now an unheld
+    // button.
     if (!_pressed) return;
 
     setState(() {

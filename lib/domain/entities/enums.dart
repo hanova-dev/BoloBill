@@ -81,6 +81,11 @@ enum QuantityUnit {
   gram('gram'),
   litre('litre'),
   meter('meter'),
+  bottle('bottle'),
+  tablet('tablet'),
+  strip('strip'),
+  packet('packet'),
+  box('box'),
   custom('custom');
 
   const QuantityUnit(this.dbValue);

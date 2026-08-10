@@ -170,6 +170,9 @@ class AppLocalizationsEn extends AppLocalizations {
       'Didn\'t catch that clearly — please check and correct';
 
   @override
+  String get priceNotCaughtBanner => 'Price not caught — enter it below';
+
+  @override
   String get itemNameLabel => 'ITEM NAME';
 
   @override
@@ -209,6 +212,21 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unitMeter => 'Meter';
+
+  @override
+  String get unitBottle => 'Bottle';
+
+  @override
+  String get unitTablet => 'Tablet';
+
+  @override
+  String get unitStrip => 'Strip';
+
+  @override
+  String get unitPacket => 'Packet';
+
+  @override
+  String get unitBox => 'Box';
 
   @override
   String get unitCustom => 'Other';

@@ -36,6 +36,11 @@ class ReceiptPaper extends StatelessWidget {
     QuantityUnit.gram => 'g',
     QuantityUnit.litre => 'L',
     QuantityUnit.meter => 'm',
+    QuantityUnit.bottle => 'btl',
+    QuantityUnit.tablet => 'tab',
+    QuantityUnit.strip => 'strip',
+    QuantityUnit.packet => 'pkt',
+    QuantityUnit.box => 'box',
     QuantityUnit.custom => '',
   };
 

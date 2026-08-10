@@ -168,6 +168,9 @@ class AppLocalizationsUr extends AppLocalizations {
   String get lowConfidenceBanner => 'صاف سنائی نہیں دیا — چیک کر کے درست کریں';
 
   @override
+  String get priceNotCaughtBanner => 'قیمت سنائی نہیں دی — نیچے درج کریں';
+
+  @override
   String get itemNameLabel => 'چیز کا نام';
 
   @override
@@ -207,6 +210,21 @@ class AppLocalizationsUr extends AppLocalizations {
 
   @override
   String get unitMeter => 'میٹر';
+
+  @override
+  String get unitBottle => 'بوتل';
+
+  @override
+  String get unitTablet => 'گولی';
+
+  @override
+  String get unitStrip => 'سٹرپ';
+
+  @override
+  String get unitPacket => 'پیکٹ';
+
+  @override
+  String get unitBox => 'ڈبہ';
 
   @override
   String get unitCustom => 'دیگر';
@@ -647,6 +665,10 @@ class AppLocalizationsUrLatn extends AppLocalizationsUr {
       'Saaf sunai nahi diya — check kar ke theek karein';
 
   @override
+  String get priceNotCaughtBanner =>
+      'Qeemat sunai nahi di — neeche darj karein';
+
+  @override
   String get itemNameLabel => 'Cheez Ka Naam';
 
   @override
@@ -686,6 +708,21 @@ class AppLocalizationsUrLatn extends AppLocalizationsUr {
 
   @override
   String get unitMeter => 'Meter';
+
+  @override
+  String get unitBottle => 'Bottle';
+
+  @override
+  String get unitTablet => 'Goli';
+
+  @override
+  String get unitStrip => 'Strip';
+
+  @override
+  String get unitPacket => 'Packet';
+
+  @override
+  String get unitBox => 'Dabba';
 
   @override
   String get unitCustom => 'Doosra';

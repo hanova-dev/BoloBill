@@ -405,6 +405,12 @@ abstract class AppLocalizations {
   /// **'Didn\'t catch that clearly — please check and correct'**
   String get lowConfidenceBanner;
 
+  /// No description provided for @priceNotCaughtBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Price not caught — enter it below'**
+  String get priceNotCaughtBanner;
+
   /// No description provided for @itemNameLabel.
   ///
   /// In en, this message translates to:
@@ -482,6 +488,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Meter'**
   String get unitMeter;
+
+  /// No description provided for @unitBottle.
+  ///
+  /// In en, this message translates to:
+  /// **'Bottle'**
+  String get unitBottle;
+
+  /// No description provided for @unitTablet.
+  ///
+  /// In en, this message translates to:
+  /// **'Tablet'**
+  String get unitTablet;
+
+  /// No description provided for @unitStrip.
+  ///
+  /// In en, this message translates to:
+  /// **'Strip'**
+  String get unitStrip;
+
+  /// No description provided for @unitPacket.
+  ///
+  /// In en, this message translates to:
+  /// **'Packet'**
+  String get unitPacket;
+
+  /// No description provided for @unitBox.
+  ///
+  /// In en, this message translates to:
+  /// **'Box'**
+  String get unitBox;
 
   /// No description provided for @unitCustom.
   ///

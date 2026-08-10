@@ -30,6 +30,23 @@ abstract final class SlotParser {
   /// text rather than assumed to be about price.
   static const _genitivePriceWords = {'ki', 'ka', 'ke', 'kay', 'کی', 'کا', 'کے'};
 
+  /// Countable-item unit words (bottle/tablet/strip/packet/box) double as
+  /// ordinary descriptive nouns inside an item name — "**bari bottle**
+  /// shampoo" (a big bottle of shampoo, one flat-priced item) uses "bottle"
+  /// this way, not as a count marker, and real speech often puts the item
+  /// name *between* the count and the unit entirely ("2 panadol golian").
+  /// Unlike the older weight/measure units below, where "unit spoken but no
+  /// number found" safely defaults to one unit, these only count as a real
+  /// unit match when a number sits immediately before them (mirrors how
+  /// [_genitivePriceWords] are only markers when a number anchors them) —
+  /// otherwise they're left as ordinary name text and the flat/package-
+  /// pricing fallback picks up the quantity instead, exactly as it did
+  /// before these words existed at all.
+  static const _ambiguousCountableUnits = {
+    QuantityUnit.bottle, QuantityUnit.tablet, QuantityUnit.strip,
+    QuantityUnit.packet, QuantityUnit.box,
+  };
+
   static ParsedLineItem parse(String rawTranscript) {
     final trimmed = rawTranscript.trim();
     final tokens = trimmed.isEmpty ? const <String>[] : trimmed.split(RegExp(r'\s+'));
@@ -43,6 +60,7 @@ abstract final class SlotParser {
       final u = DomainGrammar.parseUnit(tokens[i]);
       if (u == null) continue;
       final found = _findNumberBefore(tokens, i, consumed);
+      if (found == null && _ambiguousCountableUnits.contains(u)) continue;
       unit = u;
       consumed.add(i);
       if (found != null) {
@@ -61,6 +79,7 @@ abstract final class SlotParser {
 
     var pricePerUnit = 0.0;
     var priceConfidence = 0.0;
+    var priceWasGenitiveMarked = false;
     for (var i = 0; i < tokens.length; i++) {
       if (consumed.contains(i)) continue;
       final norm = DomainGrammar.normalize(tokens[i]);
@@ -77,8 +96,29 @@ abstract final class SlotParser {
         pricePerUnit = found.value;
         priceConfidence = 0.9;
         consumed.addAll(found.indices);
+        priceWasGenitiveMarked = isGenitiveMarker;
       }
       break;
+    }
+
+    final unitWasSpoken = quantityConfidence > 0;
+
+    // ---- Genitive-marked price after an explicit quantity is a TOTAL ------
+    // "chinni 5 kilo 500 ki" is a confirmed real-retailer phrase meaning
+    // "500 total for the 5kg" (500 / 5kg = a clean Rs 100/kg, not Rs 500/kg)
+    // — "<amount> ki" reads as "[worth] <amount>" for the quantity just
+    // stated, which is how a price gets said in this order in Urdu/Roman
+    // Urdu retail speech, not as a per-unit rate. Previously the number was
+    // stored directly as pricePerUnit, silently overcharging by a factor of
+    // the quantity every time someone stated quantity-then-price this way.
+    // Scoped to the genitive particles specifically ("ki"/"ka"/"ke"/"kay")
+    // — the unadorned "rupee"/"rupya" wording is a separately-established,
+    // already-relied-upon pattern ("2 kilo 240 rupee") and is left alone.
+    // When no real quantity was spoken at all, quantity is the flat-pricing
+    // fallback's implied 1 (or not yet resolved here), so this is a no-op
+    // until that fallback runs below.
+    if (unitWasSpoken && priceWasGenitiveMarked && priceConfidence > 0 && quantity > 0) {
+      pricePerUnit = pricePerUnit / quantity;
     }
 
     // ---- Flat / package pricing --------------------------------------------
@@ -97,7 +137,6 @@ abstract final class SlotParser {
     // genuinely heard, but the count is inferred, so it stays the weakest
     // field and any ASR uncertainty (see [withAsrConfidence]) still pulls the
     // whole line back under the gate.
-    final unitWasSpoken = quantityConfidence > 0;
     if (!unitWasSpoken && priceConfidence > 0) {
       final leading = _leadingCountBefore(tokens, consumed);
       if (leading != null) {

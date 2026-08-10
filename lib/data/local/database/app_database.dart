@@ -41,6 +41,11 @@ class AppDatabase {
             await db.execute(statement);
           }
         }
+        if (oldVersion < 3) {
+          for (final statement in kMigrationV2ToV3) {
+            await db.execute(statement);
+          }
+        }
       },
     );
     return AppDatabase._(db);

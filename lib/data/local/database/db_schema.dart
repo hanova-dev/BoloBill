@@ -11,7 +11,7 @@
 /// order step 7) always pushes/pulls a bill's line items embedded inside
 /// that bill's Firestore document, since they have no independent existence
 /// (always read together with their parent bill, never queried standalone).
-const int kDatabaseVersion = 2;
+const int kDatabaseVersion = 3;
 
 const List<String> kCreateTableStatementsV1 = [
   '''
@@ -81,7 +81,10 @@ const List<String> kCreateTableStatementsV1 = [
     item_name_raw TEXT NOT NULL,
     input_method TEXT NOT NULL CHECK (input_method IN ('voice', 'manual')),
     quantity REAL NOT NULL,
-    unit TEXT NOT NULL CHECK (unit IN ('piece', 'dozen', 'kg', 'gram', 'litre', 'meter', 'custom')),
+    unit TEXT NOT NULL CHECK (unit IN (
+      'piece', 'dozen', 'kg', 'gram', 'litre', 'meter',
+      'bottle', 'tablet', 'strip', 'packet', 'box', 'custom'
+    )),
     price_per_unit INTEGER NOT NULL,
     line_total INTEGER NOT NULL
   )
@@ -136,4 +139,39 @@ const List<String> kCreateTableStatementsV1 = [
 /// append-only guarantee documented on [KhataEntriesDao].
 const List<String> kMigrationV1ToV2 = [
   'ALTER TABLE khata_entries ADD COLUMN reversal_of_entry_id TEXT REFERENCES khata_entries(entry_id)',
+];
+
+/// v2 -> v3: widens bill_items.unit's CHECK constraint to the countable-item
+/// units (bottle, tablet, strip, packet, box) added alongside piece/dozen/
+/// kg/gram/litre/meter — packaged goods aren't sold by weight, so the voice
+/// grammar and manual-entry picker needed a real unit slot for them instead
+/// of collapsing everything into a generic "piece". SQLite can't ALTER a
+/// CHECK constraint directly, so this is the standard rebuild: copy into a
+/// table with the new constraint, drop the old one, rename.
+const List<String> kMigrationV2ToV3 = [
+  'PRAGMA foreign_keys=OFF',
+  '''
+  CREATE TABLE bill_items_v3 (
+    bill_item_id TEXT PRIMARY KEY NOT NULL,
+    bill_id TEXT NOT NULL REFERENCES bills(bill_id),
+    item_name_raw TEXT NOT NULL,
+    input_method TEXT NOT NULL CHECK (input_method IN ('voice', 'manual')),
+    quantity REAL NOT NULL,
+    unit TEXT NOT NULL CHECK (unit IN (
+      'piece', 'dozen', 'kg', 'gram', 'litre', 'meter',
+      'bottle', 'tablet', 'strip', 'packet', 'box', 'custom'
+    )),
+    price_per_unit INTEGER NOT NULL,
+    line_total INTEGER NOT NULL
+  )
+  ''',
+  '''
+  INSERT INTO bill_items_v3
+  SELECT bill_item_id, bill_id, item_name_raw, input_method, quantity, unit, price_per_unit, line_total
+  FROM bill_items
+  ''',
+  'DROP TABLE bill_items',
+  'ALTER TABLE bill_items_v3 RENAME TO bill_items',
+  'CREATE INDEX idx_bill_items_bill_id ON bill_items(bill_id)',
+  'PRAGMA foreign_keys=ON',
 ];

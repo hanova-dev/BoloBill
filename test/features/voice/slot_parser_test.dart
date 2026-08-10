@@ -91,15 +91,20 @@ void main() {
       expect(parsed.pricePerUnit.rupees, 200.0);
     });
 
-    test('"ki" combined with a real unit and fraction word parses as a fully clean auto-fill', () {
-      final parsed = SlotParser.parse('adha kilo kali pati 400 ki');
+    test(
+      '"ki" combined with a real unit and fraction word parses as a fully clean '
+      'auto-fill, with the spoken number treated as a TOTAL for that quantity '
+      '(400 for half a kilo = Rs 800/kg, not Rs 400/kg)',
+      () {
+        final parsed = SlotParser.parse('adha kilo kali pati 400 ki');
 
-      expect(parsed.itemNameRaw, 'kali pati');
-      expect(parsed.quantity, 0.5);
-      expect(parsed.unit, QuantityUnit.kg);
-      expect(parsed.pricePerUnit.rupees, 400.0);
-      expect(parsed.needsConfirmation, isFalse);
-    });
+        expect(parsed.itemNameRaw, 'kali pati');
+        expect(parsed.quantity, 0.5);
+        expect(parsed.unit, QuantityUnit.kg);
+        expect(parsed.pricePerUnit.rupees, 800.0);
+        expect(parsed.needsConfirmation, isFalse);
+      },
+    );
 
     test('a stray "ki" with no adjacent number is left in the item name, not treated as a price', () {
       final parsed = SlotParser.parse('yeh dukaan ki cheeni hai');
@@ -123,6 +128,44 @@ void main() {
       expect(parsed.pricePerUnit.rupees, 120.0);
       expect(parsed.itemNameRaw, contains('7up'));
     });
+  });
+
+  group('"ki"-marked total price after an explicit quantity (real retailer report)', () {
+    test(
+      '"chinni 5 kilo 500 ki" resolves to Rs 100/kg — retailer confirmed 500 was '
+      'the TOTAL for 5kg (500 / 5 = a clean 100), not a per-kg rate',
+      () {
+        final parsed = SlotParser.parse('chinni 5 kilo 500 ki');
+
+        expect(parsed.itemNameRaw, 'chinni');
+        expect(parsed.quantity, 5.0);
+        expect(parsed.unit, QuantityUnit.kg);
+        expect(parsed.pricePerUnit.rupees, 100.0);
+        expect(parsed.needsConfirmation, isFalse);
+      },
+    );
+
+    test(
+      'the same total-price division applies to the Urdu-script equivalent',
+      () {
+        final parsed = SlotParser.parse('چینی 5 کلو 500 کی');
+
+        expect(parsed.quantity, 5.0);
+        expect(parsed.pricePerUnit.rupees, 100.0);
+      },
+    );
+
+    test(
+      'the unadorned "rupee" word is left alone — only the genitive particles '
+      '("ki"/"ka"/"ke"/"kay") are read as a total, since "<qty> <unit> <price> '
+      'rupee" is a separately-established, already-relied-upon pattern',
+      () {
+        final parsed = SlotParser.parse('chinni 5 kilo 500 rupee');
+
+        expect(parsed.quantity, 5.0);
+        expect(parsed.pricePerUnit.rupees, 500.0);
+      },
+    );
   });
 
   group('flat / package pricing — no unit word spoken at all', () {
@@ -161,6 +204,49 @@ void main() {
       expect(parsed.quantityConfidence, 0.0);
       expect(parsed.needsConfirmation, isTrue);
     });
+  });
+
+  group('countable-item units (packaged goods aren\'t sold by weight)', () {
+    test(
+      'a number immediately before a countable unit parses as a clean quantity+unit, '
+      'with the "ki"-marked price treated as a TOTAL for both bottles (100 / 2 = Rs 50 each)',
+      () {
+        final parsed = SlotParser.parse('2 bottle chai 100 ki');
+
+        expect(parsed.quantity, 2.0);
+        expect(parsed.unit, QuantityUnit.bottle);
+        expect(parsed.pricePerUnit.rupees, 50.0);
+        expect(parsed.needsConfirmation, isFalse);
+      },
+    );
+
+    test(
+      '"golian" (tablets) directly after a leading count parses as tablet unit, '
+      'with the "ki"-marked price treated as a TOTAL for both tablets (20 / 2 = Rs 10 each)',
+      () {
+        final parsed = SlotParser.parse('2 golian panadol 20 ki');
+
+        expect(parsed.quantity, 2.0);
+        expect(parsed.unit, QuantityUnit.tablet);
+        expect(parsed.itemNameRaw, 'panadol');
+        expect(parsed.pricePerUnit.rupees, 10.0);
+        expect(parsed.needsConfirmation, isFalse);
+      },
+    );
+
+    test(
+      'a countable-unit word with no adjacent number stays in the item name '
+      'instead of hijacking the flat-price leading-count fallback '
+      '(regression: "1 bari bottle shampoo 600 ki" is a real reported retailer phrase)',
+      () {
+        final parsed = SlotParser.parse('1 bari bottle shampoo 600 ki');
+
+        expect(parsed.itemNameRaw, 'bari bottle shampoo');
+        expect(parsed.quantity, 1.0);
+        expect(parsed.pricePerUnit.rupees, 600.0);
+        expect(parsed.needsConfirmation, isFalse);
+      },
+    );
   });
 
   group('low-confidence / ambiguous parses that must trip the confidence gate', () {

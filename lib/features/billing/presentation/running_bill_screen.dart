@@ -24,6 +24,11 @@ class RunningBillScreen extends ConsumerWidget {
         QuantityUnit.gram => l10n.unitGram,
         QuantityUnit.litre => l10n.unitLitre,
         QuantityUnit.meter => l10n.unitMeter,
+        QuantityUnit.bottle => l10n.unitBottle,
+        QuantityUnit.tablet => l10n.unitTablet,
+        QuantityUnit.strip => l10n.unitStrip,
+        QuantityUnit.packet => l10n.unitPacket,
+        QuantityUnit.box => l10n.unitBox,
         QuantityUnit.custom => l10n.unitCustom,
       };
 

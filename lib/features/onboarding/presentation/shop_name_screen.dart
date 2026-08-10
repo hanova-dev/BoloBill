@@ -55,6 +55,22 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
   /// listening into an unheld button.
   bool _pressed = false;
 
+  /// See [VoiceListeningScreen._speechSetup] — pre-warmed in [initState]
+  /// rather than lazily on first press, since engine init alone measured
+  /// multiple seconds on real hardware and used to sit entirely between the
+  /// retailer's touch and any visible response.
+  late Future<String?> _speechSetup;
+
+  /// See [VoiceListeningScreen._startToken] — guards against overlapping
+  /// `_start` calls from rapid repeated taps during that dead window.
+  int _startToken = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _speechSetup = _prepareSpeechEngine();
+  }
+
   @override
   void dispose() {
     _listenTimeoutTimer?.cancel();
@@ -63,54 +79,30 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
     super.dispose();
   }
 
-  void _onHoldStart() {
-    _pressed = true;
-    _start();
-  }
-
-  void _onHoldEnd() {
-    _pressed = false;
-    if (_listening) _speech.stop();
-  }
-
-  Future<void> _start() async {
-    setState(() => _micError = null);
-    final l10n = AppLocalizations.of(context);
-
-    final status = await Permission.microphone.request();
-    if (!status.isGranted) {
-      setState(() => _micError = l10n.micPermissionDenied);
-      return;
-    }
-
-    if (!_speechAvailable) {
-      _speechAvailable = await _speech.initialize(
-        // speech_to_text's error codes ("error_speech_timeout",
-        // "error_no_match", ...) are internal platform identifiers, not
-        // user-facing text — showing them raw to a low-literacy retailer
-        // defeats the point of a voice-first app. Every error, from the
-        // engine or from the timeout below, collapses to the same one
-        // friendly retry prompt already used on B2.
-        onError: (error) {
-          if (!mounted) return;
+  Future<String?> _prepareSpeechEngine() async {
+    _speechAvailable = await _speech.initialize(
+      // speech_to_text's error codes ("error_speech_timeout",
+      // "error_no_match", ...) are internal platform identifiers, not
+      // user-facing text — showing them raw to a low-literacy retailer
+      // defeats the point of a voice-first app. Every error, from the
+      // engine or from the timeout below, collapses to the same one
+      // friendly retry prompt already used on B2.
+      onError: (error) {
+        if (!mounted) return;
+        _listenTimeoutTimer?.cancel();
+        setState(() {
+          _micError = AppLocalizations.of(context).noisyPrompt;
+          _listening = false;
+        });
+      },
+      onStatus: (status) {
+        if (status == 'done' || status == 'notListening') {
           _listenTimeoutTimer?.cancel();
-          setState(() {
-            _micError = l10n.noisyPrompt;
-            _listening = false;
-          });
-        },
-        onStatus: (status) {
-          if (status == 'done' || status == 'notListening') {
-            _listenTimeoutTimer?.cancel();
-            if (mounted) setState(() => _listening = false);
-          }
-        },
-      );
-    }
-    if (!_speechAvailable) {
-      setState(() => _micError = l10n.micUnavailable);
-      return;
-    }
+          if (mounted) setState(() => _listening = false);
+        }
+      },
+    );
+    if (!_speechAvailable) return null;
 
     final locale = ref.read(localeProvider);
     final preferredLocaleId = switch (locale) {
@@ -126,7 +118,7 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
     // routinely report a regional variant (en_GB, en_IN, en_PK, ...) rather
     // than the literal en_US/ur_PK, and locales() itself is sometimes empty
     // even on a device where recognition works fine. See
-    // VoiceListeningScreen._start for the full reasoning.
+    // VoiceListeningScreen._prepareSpeechEngine for the full reasoning.
     final available = await _speech.locales();
     stt.LocaleName? matched;
     for (final l in available) {
@@ -143,11 +135,37 @@ class _ShopNameScreenState extends ConsumerState<ShopNameScreen> {
         }
       }
     }
-    if (available.isNotEmpty && matched == null) {
+    if (available.isNotEmpty && matched == null) return null;
+    return matched?.localeId ?? preferredLocaleId;
+  }
+
+  void _onHoldStart() {
+    _pressed = true;
+    _start(++_startToken);
+  }
+
+  void _onHoldEnd() {
+    _pressed = false;
+    if (_listening) _speech.stop();
+  }
+
+  Future<void> _start(int token) async {
+    setState(() => _micError = null);
+    final l10n = AppLocalizations.of(context);
+
+    final status = await Permission.microphone.request();
+    if (token != _startToken) return;
+    if (!status.isGranted) {
+      setState(() => _micError = l10n.micPermissionDenied);
+      return;
+    }
+
+    final speechLocaleId = await _speechSetup;
+    if (token != _startToken) return;
+    if (speechLocaleId == null) {
       setState(() => _micError = l10n.micUnavailable);
       return;
     }
-    final speechLocaleId = matched?.localeId ?? preferredLocaleId;
 
     if (!_pressed) return;
 

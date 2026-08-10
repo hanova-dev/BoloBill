@@ -53,8 +53,23 @@ class _ManualEntryScreenState extends ConsumerState<ManualEntryScreen> {
   late bool _showQuantity = widget.prefill != null &&
       (widget.prefill!.unit != QuantityUnit.piece || widget.prefill!.quantity != 1);
 
-  late _ActiveField _activeField =
-      _showQuantity ? _ActiveField.quantity : _ActiveField.price;
+  late _ActiveField _activeField = _initialActiveField();
+
+  /// If price is the only field the confidence gate flagged — item, unit,
+  /// and quantity were all heard fine — jump straight to it instead of
+  /// making the retailer tap through fields that were already correct.
+  _ActiveField _initialActiveField() {
+    if (_priceOnlyLowConfidence) return _ActiveField.price;
+    return _showQuantity ? _ActiveField.quantity : _ActiveField.price;
+  }
+
+  bool get _priceOnlyLowConfidence {
+    final prefill = widget.prefill;
+    if (prefill == null) return false;
+    return prefill.priceConfidence < ParsedLineItem.confidenceThreshold &&
+        prefill.itemNameConfidence >= ParsedLineItem.confidenceThreshold &&
+        prefill.quantityConfidence >= ParsedLineItem.confidenceThreshold;
+  }
 
   static String _prefillNumberText(double? value) {
     if (value == null || value == 0) return '';
@@ -156,7 +171,7 @@ class _ManualEntryScreenState extends ConsumerState<ManualEntryScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          l10n.lowConfidenceBanner,
+                          _priceOnlyLowConfidence ? l10n.priceNotCaughtBanner : l10n.lowConfidenceBanner,
                           style: type.caption.copyWith(color: colors.alert),
                         ),
                       ),
@@ -277,6 +292,11 @@ class _ManualEntryScreenState extends ConsumerState<ManualEntryScreen> {
         QuantityUnit.gram => l10n.unitGram,
         QuantityUnit.litre => l10n.unitLitre,
         QuantityUnit.meter => l10n.unitMeter,
+        QuantityUnit.bottle => l10n.unitBottle,
+        QuantityUnit.tablet => l10n.unitTablet,
+        QuantityUnit.strip => l10n.unitStrip,
+        QuantityUnit.packet => l10n.unitPacket,
+        QuantityUnit.box => l10n.unitBox,
         QuantityUnit.custom => l10n.unitCustom,
       };
 }

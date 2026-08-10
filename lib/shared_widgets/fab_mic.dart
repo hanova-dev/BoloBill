@@ -47,6 +47,15 @@ class FabMic extends StatefulWidget {
 class _FabMicState extends State<FabMic> with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
+  /// True the instant a finger touches the button — deliberately local and
+  /// synchronous, not derived from [widget.listening]. Real-device testing
+  /// found the retailer got zero visual response for several seconds after
+  /// pressing (permission checks and engine setup all had to resolve first
+  /// before the parent ever set `listening: true`), so they assumed the
+  /// press hadn't registered and pressed again — worth fixing here, at the
+  /// gesture itself, rather than only by making that setup faster.
+  bool _pressed = false;
+
   @override
   void initState() {
     super.initState();
@@ -85,24 +94,33 @@ class _FabMicState extends State<FabMic> with SingleTickerProviderStateMixin {
   Widget build(BuildContext context) {
     final colors = Theme.of(context).extension<AppColorTokens>()!;
 
-    final button = Container(
-      width: widget.size,
-      height: widget.size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        gradient: RadialGradient(
-          center: const Alignment(-0.3, -0.4),
-          colors: [colors.accentGradientEnd, colors.accent],
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: colors.accent.withValues(alpha: 0.45),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+    final button = AnimatedScale(
+      // Fires on the same frame as the touch itself — no dependency on
+      // permission checks, engine init, or anything else async. That's the
+      // whole point: the retailer needs to feel the press register
+      // instantly, well before the app can honestly say it's listening.
+      scale: _pressed ? 0.92 : 1.0,
+      duration: const Duration(milliseconds: 80),
+      curve: Curves.easeOut,
+      child: Container(
+        width: widget.size,
+        height: widget.size,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          gradient: RadialGradient(
+            center: const Alignment(-0.3, -0.4),
+            colors: [colors.accentGradientEnd, colors.accent],
           ),
-        ],
+          boxShadow: [
+            BoxShadow(
+              color: colors.accent.withValues(alpha: _pressed ? 0.65 : 0.45),
+              blurRadius: 24,
+              offset: const Offset(0, 12),
+            ),
+          ],
+        ),
+        child: Icon(Icons.mic, color: Colors.white, size: widget.size * 0.38),
       ),
-      child: Icon(Icons.mic, color: Colors.white, size: widget.size * 0.38),
     );
 
     return SizedBox(
@@ -118,9 +136,18 @@ class _FabMicState extends State<FabMic> with SingleTickerProviderStateMixin {
           ],
           if (widget.onHoldStart != null)
             GestureDetector(
-              onTapDown: (_) => widget.onHoldStart!(),
-              onTapUp: (_) => widget.onHoldEnd!(),
-              onTapCancel: widget.onHoldEnd,
+              onTapDown: (_) {
+                setState(() => _pressed = true);
+                widget.onHoldStart!();
+              },
+              onTapUp: (_) {
+                setState(() => _pressed = false);
+                widget.onHoldEnd!();
+              },
+              onTapCancel: () {
+                setState(() => _pressed = false);
+                widget.onHoldEnd?.call();
+              },
               child: button,
             )
           else

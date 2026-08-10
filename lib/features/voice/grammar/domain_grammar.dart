@@ -40,6 +40,19 @@ abstract final class DomainGrammar {
     'dozen': QuantityUnit.dozen, 'darjan': QuantityUnit.dozen, 'درجن': QuantityUnit.dozen,
     'litre': QuantityUnit.litre, 'liter': QuantityUnit.litre, 'لیٹر': QuantityUnit.litre,
     'meter': QuantityUnit.meter, 'metre': QuantityUnit.meter, 'میٹر': QuantityUnit.meter,
+    // Countable-item units — packaged goods aren't sold by weight, so a
+    // retailer saying "1 shampoo ki bottle" or "2 panadol golian" needs a
+    // unit slot to land in, not a silent fall-through to a generic "piece".
+    'bottle': QuantityUnit.bottle, 'bottles': QuantityUnit.bottle,
+    'botal': QuantityUnit.bottle, 'بوتل': QuantityUnit.bottle,
+    'tablet': QuantityUnit.tablet, 'tablets': QuantityUnit.tablet, 'tab': QuantityUnit.tablet,
+    'goli': QuantityUnit.tablet, 'golian': QuantityUnit.tablet, 'goliyan': QuantityUnit.tablet,
+    'گولی': QuantityUnit.tablet, 'گولیاں': QuantityUnit.tablet,
+    'strip': QuantityUnit.strip, 'strips': QuantityUnit.strip, 'سٹرپ': QuantityUnit.strip,
+    'packet': QuantityUnit.packet, 'packets': QuantityUnit.packet, 'paket': QuantityUnit.packet,
+    'پیکٹ': QuantityUnit.packet,
+    'box': QuantityUnit.box, 'boxes': QuantityUnit.box,
+    'dabba': QuantityUnit.box, 'dabbi': QuantityUnit.box, 'ڈبہ': QuantityUnit.box, 'ڈبی': QuantityUnit.box,
   };
 
   // ---- Numeral words (1-100), Roman Urdu ----------------------------------
