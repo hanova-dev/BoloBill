@@ -1,108 +1,139 @@
-<p align="center">
-  <img src="assets/icon/app_icon.png" width="120" alt="BoloBill icon" />
-</p>
+# BoloBill
 
-<h1 align="center">BoloBill</h1>
-<p align="center"><em>بولو اور بل بناؤ — speak it, bill it.</em></p>
+**A voice-first billing and khata (credit ledger) Android app for retailers who can't type.**
 
-<p align="center">
-  <a href="https://github.com/hanova-dev/BoloBill/releases/latest">
-    <img src="https://img.shields.io/badge/Download-APK-4A3225?style=for-the-badge&logo=android&logoColor=white" alt="Download APK" />
-  </a>
-</p>
+Flutter · Clean Architecture · Offline-first with AES-256 encrypted local storage · English, Urdu and Roman Urdu
 
-BoloBill is a voice-first billing and **khata** (credit ledger) app built for
-illiterate and low-literacy retailers in Pakistan. A shopkeeper can build a
-bill by speaking item names, quantities, and prices out loud, hear the total
-read back before confirming, and record a sale as cash or against a
-customer's khata — all without needing to read or type.
+---
 
-## Download
+## Why this exists
 
-Grab the latest APK from the [Releases page](https://github.com/hanova-dev/BoloBill/releases/latest),
-or the direct link below:
+I spent time behind the counter at my father's general store in Attock. Two things were obvious within an hour:
 
-**➡️ [BoloBill-v1.0.7.apk](https://github.com/hanova-dev/BoloBill/releases/download/v1.0.7/BoloBill-v1.0.7.apk)** (Android 8.0 / API 26+)
+1. Customers come in bursts. There is no time to tap out an itemised bill for every sale.
+2. The retailer is *fast* on a physical calculator — faster than anyone is on a phone keyboard.
 
-> **Coming from v1.0.2 or earlier?** Uninstall the old app first. v1.0.3
-> switched to a real release signing key (previous builds used the shared
-> Flutter debug key, which is exactly the kind of thing phone security
-> software silently refuses to open) — Android won't install this over an
-> app signed with a different key. This is a one-time thing; updates from
-> v1.0.3 onward will install normally.
+Most billing apps assume a product catalogue, a barcode scanner and a literate operator who can type. In a village general store none of those hold: prices fluctuate daily, customers buy 50 grams of something, and the person behind the counter may not read.
 
-You'll need to allow "install from unknown sources" for your browser or file
-manager, since this isn't distributed through the Play Store.
+So BoloBill has no catalogue and no barcode scanner. You speak the sale, or you type it. Nothing else.
+
+---
+
+## The interesting problem: Urdu price grammar is ambiguous
+
+A custom slot parser extracts `item`, `quantity`, `unit` and `price` from a single natural spoken phrase. Transcription is the easy half. This is the hard half:
+
+| Spoken | Means |
+|---|---|
+| `chinni 5 kilo 100 ka` | sugar, 5 kg, **Rs 100 per kg** → Rs 500 total |
+| `chinni 5 kilo 500 ki` | sugar, 5 kg, **Rs 500 total** → Rs 100 per kg |
+
+One letter. The `ki` / `ka` marker after a quantity flips whether the number that follows is a unit price or a total. Default to unit price and you silently hand the customer a bill that is five times wrong.
+
+The parser handles this explicitly, and it is covered by tests:
+
+```
+lib/features/voice/grammar/domain_grammar.dart      → the marker grammar
+lib/features/voice/slot_parser/slot_parser.dart     → extraction + confidence
+lib/features/voice/ml/slot_model_weights.dart       → trained model weights
+test/features/voice/slot_parser_test.dart
+test/features/voice/domain_grammar_test.dart
+test/features/voice/parsed_line_item_test.dart
+```
+
+When parser confidence on one field is low, the app asks the retailer to confirm **that field only**, rather than discarding the whole utterance and making them start again.
+
+---
+
+## An engineering decision worth reading
+
+I trained a **custom slot model** for this, expecting it to beat the hand-written parser on noisy shop audio and mixed accents.
+
+It did not. The rule-based parser outperformed it on the real test recordings.
+
+So the rule-based parser is what ships, and the model weights stay in the tree as the record of the experiment. That is the honest result — the interesting engineering turned out to be in the price-marker grammar, not in the model.
+
+---
 
 ## Features
 
-- **Voice or manual billing** — speak an item, quantity, and price, or type
-  it manually; a domain-aware grammar layer understands fractions ("adha
-  kilo"), compound numbers, and Roman Urdu numerals, with a confidence gate
-  that asks for confirmation whenever it's unsure.
-- **Jama Karain read-back** — the total is always read aloud (text-to-speech)
-  before a bill is confirmed, so a bill is never saved on a misheard number.
-- **Khata (credit ledger)** — customers with photos, running balances, partial
-  and overpayments handled as a simple append-only ledger, sorted by balance
-  or recency.
-- **Offline-first** — the entire app works with zero connectivity; local data
-  is stored in a SQLCipher-encrypted (AES-256) SQLite database.
-- **Cloud sync** — once signed in, bills and khata entries sync to Firebase/
-  Firestore in the background, with a clear synced/offline status indicator
-  and a manual "Sync Now".
-- **Receipts** — on-device receipt rendering, WhatsApp share, and Bluetooth
-  ESC/POS thermal printer support.
-- **Overdue reminders** — a local notification nudges the shopkeeper about
-  customers who haven't paid down their khata in a while.
-- **Full localization** — English, Urdu, and Roman Urdu, with correct
-  right-to-left layout for Urdu script (and correctly *not* RTL for Roman
-  Urdu, despite sharing a language code).
+**Billing** — voice or manual line-item entry, a running bill, an explicit *"Jama Karain"* (calculate) action that totals the items and **reads the total back aloud** via TTS, and payment-type selection.
+
+**Khata (credit ledger)** — customer profiles with name, photo, CNIC photo and phone number, entered by hand or by voice the way a paper register works. Generate a receipt against an existing customer and it files itself into their ledger.
+
+**Receipts** — WhatsApp delivery via share intent, plus **Bluetooth thermal printer** support (ESC/POS).
+
+**Reports** — sales and ledger views over the local database.
+
+**Trilingual** — full ARB localisation for English, Urdu and Roman Urdu (`app_en.arb`, `app_ur.arb`, `app_ur_Latn.arb`), with Noto Nastaliq Urdu bundled locally so typography works with zero connectivity.
+
+---
+
+## Architecture
+
+Clean Architecture, strictly layered:
+
+```
+lib/
+├── core/           di · localization · navigation · sync · theme
+├── domain/         entities · repository interfaces
+├── data/
+│   ├── local/      SQLCipher database + DAOs
+│   ├── remote/     firestore_sync_service.dart
+│   └── repositories/
+└── features/       billing · khata · receipts · reports
+                    voice · onboarding · notifications · settings
+```
+
+**Offline-first, then sync.** Every write lands in the encrypted local database first. `core/sync/sync_manager.dart` reconciles with Firestore when connectivity returns — client-generated UUIDs as primary keys keep that offline-safe, and `integration_test/sync_test.dart` exercises the path.
+
+**Security.** The local database is SQLCipher with AES-256; the passphrase lives in the Android Keystore via `flutter_secure_storage`, not in the source.
+
+---
 
 ## Tech stack
 
-| | |
+| Layer | Choice |
 |---|---|
-| Framework | Flutter / Dart |
-| State management | Riverpod |
-| Local storage | `sqflite_sqlcipher` (encrypted SQLite) |
-| Cloud | Firebase Auth, Cloud Firestore |
-| Voice | Android `SpeechRecognizer` (via `speech_to_text`) + `flutter_tts` |
-| Printing | Bluetooth ESC/POS (`print_bluetooth_thermal`, `esc_pos_utils_plus`) |
-| Notifications | `flutter_local_notifications` |
+| Framework | Flutter 3.11+ / Dart |
+| State | Riverpod |
+| Local database | `sqflite_sqlcipher` (AES-256) + Android Keystore |
+| Sync | Cloud Firestore, offline-first via `sync_manager` |
+| Auth | Firebase Auth — Google Sign-In and phone OTP |
+| Speech | `speech_to_text` (push-to-talk), `flutter_tts` for read-back |
+| Printing | `print_bluetooth_thermal` + `esc_pos_utils_plus` |
+| Sharing | `share_plus` (WhatsApp) |
+| Testing | `flutter_test`, `integration_test`, `fake_cloud_firestore` — 18 test files |
 
-## Getting started
+Android, min SDK 26. Current version **1.0.7+8**.
+
+---
+
+## Running it
 
 ```bash
+git clone https://github.com/hanova-dev/BoloBill.git
+cd BoloBill
 flutter pub get
 flutter run
 ```
 
-The app targets Android only (minSdk 26). To build a release APK yourself:
+Requires Flutter 3.11+ and an Android device or emulator with microphone access. You'll need your own `google-services.json` for the Firebase features.
 
-```bash
-flutter build apk --release
-```
+---
 
-Firebase is required for sign-in and sync — you'll need your own
-`android/app/google-services.json` from a Firebase project with Phone,
-Google, and Firestore enabled if you're building from source rather than
-using the release APK above.
+## Status and current work
 
-## Project structure
+Shipped and tested with a working retailer.
 
-```
-lib/
-  app/            # MaterialApp, theming + locale wiring
-  core/           # theme, localization, database, sync, utils
-  domain/         # entities, repository interfaces, usecases
-  data/           # repository implementations, local DB, Firebase
-  features/       # one folder per screen group (onboarding, billing,
-                   # khata, receipts, reports, settings, notifications, voice)
-  shared_widgets/ # widgets reused across features
-```
+- Extending the unit taxonomy beyond weight and count (`piece, dozen, kg, gram, litre, metre`) to include `bottle, packet, strip, box` — wired through enum, schema, grammar, UI and receipt formatting.
+- Reducing time-to-first-listen after the mic button is pressed.
+- Exploring a calculator-style fast entry mode for high-volume moments, based on retailer feedback.
 
-## Known limitation
+---
 
-Phone-number sign-in (OTP) requires a real device or an emulator with full
-Google Play Services — it will not complete on a bare "Google APIs" AVD
-image. Google Sign-In is the recommended path for testing on an emulator.
+## Author
+
+**Muhammad Abdul Hanan** — Flutter Developer, final-year BS Software Engineering at COMSATS University Islamabad.
+
+[LinkedIn](https://www.linkedin.com/in/hananbinsaleh) · [GitHub](https://github.com/hanova-dev) · callmeabdulhanann@gmail.com
